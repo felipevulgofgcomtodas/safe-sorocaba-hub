@@ -27,8 +27,24 @@ const HeroSection = () => {
           title="Rain background"
         />
         {/* Layered dark overlays for readability */}
-        <div className="absolute inset-0 bg-background/70" />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, hsl(220 20% 6% / 0.5) 0%, hsl(220 20% 6% / 0.85) 60%, hsl(220 20% 6% / 0.98) 100%)' }} />
+        <div className="absolute inset-0 bg-background/60" />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, hsl(220 20% 6% / 0.4) 0%, hsl(220 20% 6% / 0.75) 60%, hsl(220 20% 6% / 0.95) 100%)' }} />
+
+        {/* CSS Rain effect overlay */}
+        <div className="absolute inset-0 pointer-events-none z-[1]" id="rain-overlay">
+          {Array.from({ length: 80 }).map((_, i) => (
+            <div
+              key={i}
+              className="rain-drop"
+              style={{
+                left: `${Math.random() * 100}%`,
+                animationDuration: `${0.6 + Math.random() * 0.4}s`,
+                animationDelay: `${Math.random() * 2}s`,
+                opacity: 0.15 + Math.random() * 0.25,
+              }}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Content */}
