@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Shield, Search, MapPin, AlertTriangle, Navigation, Users, Filter, Zap, User, LogOut } from "lucide-react";
+import { ArrowLeft, Shield, Search, MapPin, AlertTriangle, Navigation, Users, Filter, Zap, User, LogOut, ChevronUp, Info } from "lucide-react";
 import { shelters as initialShelters, riskZones, isInRiskZone, findNearestSafeShelter, getStatusLabel, getStatusColor, getTypeLabel, type Shelter } from "@/data/shelters";
 import ShelterCard from "@/components/ShelterCard";
 import DashboardStats from "@/components/DashboardStats";
@@ -132,6 +132,59 @@ const Mapa = () => {
     const dLon = (lng2 - lng1) * Math.PI / 180;
     const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  };
+
+  const LegendPanel = () => {
+    const [legendOpen, setLegendOpen] = useState(false);
+    return (
+      <div className="absolute top-4 right-4 md:top-4 md:right-4 z-50">
+        {/* Desktop: always visible */}
+        <div className="hidden md:block bg-card/95 backdrop-blur-sm border border-border rounded-2xl p-3.5 shadow-lg">
+          <p className="text-xs font-bold text-foreground mb-2.5 flex items-center gap-1.5">
+            <Info className="w-3.5 h-3.5 text-primary" />
+            Legenda
+          </p>
+          <div className="space-y-1.5">
+            <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mb-1">Zonas de Risco</p>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="w-3 h-3 rounded-full bg-danger" /> Alto</div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="w-3 h-3 rounded-full bg-warning" /> Médio</div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="w-3 h-3 rounded-full" style={{ background: 'hsl(48 96% 53%)' }} /> Moderado</div>
+            <div className="my-1.5 h-px bg-border" />
+            <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mb-1">Abrigos</p>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="w-3 h-3 rounded-full bg-safe" /> Disponível</div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="w-3 h-3 rounded-full bg-warning" /> Parcial</div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="w-3 h-3 rounded-full bg-danger" /> Lotado</div>
+          </div>
+        </div>
+
+        {/* Mobile: collapsible */}
+        <div className="md:hidden">
+          <button
+            onClick={() => setLegendOpen(!legendOpen)}
+            className="bg-card/95 backdrop-blur-sm border border-border rounded-xl px-3 py-2 shadow-lg flex items-center gap-2 active:scale-[0.97] transition-all"
+          >
+            <Info className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs font-bold text-foreground">Legenda</span>
+            <ChevronUp className={`w-3.5 h-3.5 text-muted-foreground transition-transform duration-300 ${legendOpen ? 'rotate-0' : 'rotate-180'}`} />
+          </button>
+          {legendOpen && (
+            <div className="mt-2 bg-card/95 backdrop-blur-sm border border-border rounded-2xl p-3.5 shadow-lg animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="space-y-1.5">
+                <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mb-1">Zonas de Risco</p>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="w-3 h-3 rounded-full bg-danger" /> Alto</div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="w-3 h-3 rounded-full bg-warning" /> Médio</div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="w-3 h-3 rounded-full" style={{ background: 'hsl(48 96% 53%)' }} /> Moderado</div>
+                <div className="my-1.5 h-px bg-border" />
+                <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mb-1">Abrigos</p>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="w-3 h-3 rounded-full bg-safe" /> Disponível</div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="w-3 h-3 rounded-full bg-warning" /> Parcial</div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="w-3 h-3 rounded-full bg-danger" /> Lotado</div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -379,33 +432,8 @@ const Mapa = () => {
             </div>
           )}
 
-          {/* Legend */}
-          <div className="absolute top-4 right-4 bg-card/95 backdrop-blur-sm border border-border rounded-2xl p-3.5 z-50 shadow-lg">
-            <p className="text-xs font-bold text-foreground mb-2.5">Legenda</p>
-            <div className="space-y-1.5">
-              <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mb-1">Zonas de Risco</p>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="w-3 h-3 rounded-full bg-danger" /> Alto
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="w-3 h-3 rounded-full bg-warning" /> Médio
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="w-3 h-3 rounded-full" style={{ background: 'hsl(48 96% 53%)' }} /> Moderado
-              </div>
-              <div className="my-1.5 h-px bg-border" />
-              <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mb-1">Abrigos</p>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="w-3 h-3 rounded-full bg-safe" /> Disponível
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="w-3 h-3 rounded-full bg-warning" /> Parcial
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="w-3 h-3 rounded-full bg-danger" /> Lotado
-              </div>
-            </div>
-          </div>
+          {/* Collapsible Legend */}
+          <LegendPanel />
 
           {/* Simulation overlay */}
           {simulationMode && (
