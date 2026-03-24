@@ -324,6 +324,7 @@ const Mapa = () => {
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold text-foreground">{s.name}</span>
                       {isRec && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-safe/20 text-safe font-bold">★</span>}
+                      {isUrgent && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-danger/20 text-danger font-bold animate-pulse">🔥</span>}
                     </div>
                     <span className={`w-2.5 h-2.5 rounded-full ${getStatusColor(s.status)}`} />
                   </div>
