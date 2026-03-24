@@ -8,6 +8,9 @@ import Index from "./pages/Index.tsx";
 import Login from "./pages/Login.tsx";
 import Cadastro from "./pages/Cadastro.tsx";
 import Mapa from "./pages/Mapa.tsx";
+import Alertas from "./pages/Alertas.tsx";
+import Ocupacao from "./pages/Ocupacao.tsx";
+import Monitoramento from "./pages/Monitoramento.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -24,6 +27,9 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/mapa" element={<Mapa />} />
+            <Route path="/alertas" element={<Alertas />} />
+            <Route path="/ocupacao" element={<Ocupacao />} />
+            <Route path="/monitoramento" element={<Monitoramento />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
