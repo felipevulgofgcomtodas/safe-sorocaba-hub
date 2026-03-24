@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Navigation, Shield, Users, Bell, Droplets } from "lucide-react";
+import { MapPin, Navigation, Shield, Users, Bell, Droplets, AlertTriangle } from "lucide-react";
 import logoPrefeiture from "@/assets/logo-prefeitura.png";
+import EmergencyActionModal from "@/components/EmergencyActionModal";
 
 const HeroSection = () => {
   const [address, setAddress] = useState("");
+  const [emergencyOpen, setEmergencyOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleVerify = () => {
@@ -26,11 +28,8 @@ const HeroSection = () => {
           allow="autoplay"
           title="Rain background"
         />
-        {/* Layered dark overlays for readability */}
         <div className="absolute inset-0 bg-background/60" />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, hsl(220 20% 6% / 0.4) 0%, hsl(220 20% 6% / 0.75) 60%, hsl(220 20% 6% / 0.95) 100%)' }} />
-
-        {/* CSS Rain effect overlay */}
         <div className="absolute inset-0 pointer-events-none z-[1]" id="rain-overlay">
           {Array.from({ length: 80 }).map((_, i) => (
             <div
@@ -49,12 +48,10 @@ const HeroSection = () => {
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 pt-28 pb-20 text-center">
-        {/* Logo centered */}
         <div className="flex justify-center mb-6">
           <img src={logoPrefeiture} alt="Prefeitura de Sorocaba" className="h-16 md:h-20 w-auto drop-shadow-lg" />
         </div>
 
-        {/* Live badge */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-safe/10 border border-safe/30 mb-6">
           <span className="w-2 h-2 rounded-full bg-safe pulse-live" />
           <span className="text-sm font-medium text-safe">Monitoramento Ativo</span>
@@ -65,9 +62,18 @@ const HeroSection = () => {
           <span className="text-primary">situações de enchente</span>
         </h1>
 
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
           Consulte áreas de risco, encontre abrigos e receba alertas em tempo real
         </p>
+
+        {/* Emergency CTA */}
+        <button
+          onClick={() => setEmergencyOpen(true)}
+          className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl bg-danger text-danger-foreground font-bold text-sm mb-8 hover:bg-danger/90 transition-all active:scale-[0.97] shadow-lg shadow-danger/30 animate-pulse hover:animate-none"
+        >
+          <AlertTriangle className="w-5 h-5" />
+          🚨 O QUE FAZER AGORA
+        </button>
 
         {/* Search field */}
         <div className="max-w-xl mx-auto mb-5">
@@ -85,7 +91,7 @@ const HeroSection = () => {
             </div>
             <button
               onClick={handleVerify}
-              className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-all hover:shadow-md hover:shadow-primary/20 flex items-center justify-center gap-2"
+              className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-all hover:shadow-md hover:shadow-primary/20 flex items-center justify-center gap-2 active:scale-[0.97]"
             >
               <Shield className="w-4 h-4" />
               Verificar área de risco
@@ -121,6 +127,8 @@ const HeroSection = () => {
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 text-muted-foreground/50">
         <Droplets className="w-4 h-4 animate-bounce" />
       </div>
+
+      <EmergencyActionModal open={emergencyOpen} onClose={() => setEmergencyOpen(false)} />
     </section>
   );
 };

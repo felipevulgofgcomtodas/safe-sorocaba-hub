@@ -5,6 +5,7 @@ import { shelters as initialShelters, riskZones, isInRiskZone, findNearestSafeSh
 import ShelterCard from "@/components/ShelterCard";
 import DashboardStats from "@/components/DashboardStats";
 import NotificationSystem from "@/components/NotificationSystem";
+import EmergencyActionModal from "@/components/EmergencyActionModal";
 import { useAuth } from "@/contexts/AuthContext";
 
 const GOOGLE_MAP_EMBED = "https://www.google.com/maps/d/embed?mid=1hVMhW-dDHDhydy0KpILvt1I57aRC7CY";
@@ -21,6 +22,7 @@ const Mapa = () => {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searching, setSearching] = useState(false);
   const [simulationMode, setSimulationMode] = useState(false);
+  const [emergencyOpen, setEmergencyOpen] = useState(false);
 
   // Auto-search user address on login
   useEffect(() => {
@@ -62,6 +64,14 @@ const Mapa = () => {
     if (filterStatus === "all") return shelterData;
     return shelterData.filter(s => s.status === filterStatus);
   }, [filterStatus, shelterData]);
+
+  const mostUrgentShelter = useMemo(() => {
+    return shelterData.reduce((worst, s) => {
+      const urgency = s.donations.reduce((sum, d) => sum + (d.needed - d.received), 0);
+      const worstUrgency = worst ? worst.donations.reduce((sum, d) => sum + (d.needed - d.received), 0) : 0;
+      return urgency > worstUrgency ? s : worst;
+    }, null as Shelter | null);
+  }, [shelterData]);
 
   const processLocation = useCallback((lat: number, lng: number) => {
     setUserLocation({ lat, lng });
@@ -153,6 +163,13 @@ const Mapa = () => {
             {simulationMode ? 'SIMULAÇÃO ATIVA' : 'Simular Enchente'}
           </button>
           <NotificationSystem />
+          <button
+            onClick={() => setEmergencyOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-danger/20 border border-danger/30 text-danger hover:bg-danger/30 transition-all active:scale-[0.96]"
+          >
+            <AlertTriangle className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">O que fazer</span>
+          </button>
           {user && (
             <div className="hidden md:flex items-center gap-2 px-2 py-1 rounded-lg bg-muted/50 border border-border">
               <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
@@ -290,6 +307,7 @@ const Mapa = () => {
             {filteredShelters.map(s => {
               const occupancy = Math.round((s.occupied / s.capacity) * 100);
               const isRec = recommended?.id === s.id;
+              const isUrgent = mostUrgentShelter?.id === s.id;
               return (
                 <button
                   key={s.id}
@@ -306,6 +324,7 @@ const Mapa = () => {
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold text-foreground">{s.name}</span>
                       {isRec && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-safe/20 text-safe font-bold">★</span>}
+                      {isUrgent && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-danger/20 text-danger font-bold animate-pulse">🔥</span>}
                     </div>
                     <span className={`w-2.5 h-2.5 rounded-full ${getStatusColor(s.status)}`} />
                   </div>
@@ -353,6 +372,7 @@ const Mapa = () => {
                 shelter={selectedShelter}
                 onClose={() => setSelectedShelter(null)}
                 isRecommended={recommended?.id === selectedShelter.id}
+                isMostUrgent={mostUrgentShelter?.id === selectedShelter.id}
                 onNavigate={() => handleNavigate(selectedShelter)}
                 onDonate={handleDonate}
               />
@@ -396,6 +416,7 @@ const Mapa = () => {
           )}
         </div>
       </div>
+      <EmergencyActionModal open={emergencyOpen} onClose={() => setEmergencyOpen(false)} />
     </div>
   );
 };
