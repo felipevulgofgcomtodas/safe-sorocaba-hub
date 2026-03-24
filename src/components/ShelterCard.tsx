@@ -65,7 +65,7 @@ const ShelterCard = ({ shelter, onClose, isRecommended, isMostUrgent, onNavigate
       </div>
 
       {/* Body */}
-      <div className="p-4 space-y-4">
+      <div className={`p-4 space-y-4 transition-all duration-300 ${minimized ? 'max-h-0 overflow-hidden p-0 md:max-h-none md:p-4' : 'max-h-[70vh] overflow-y-auto'}`}>
         <div>
           <h3 className="font-bold text-lg text-foreground leading-tight">{shelter.name}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">{getTypeLabel(shelter.type)}</p>
