@@ -6,6 +6,7 @@ interface ShelterCardProps {
   shelter: Shelter;
   onClose: () => void;
   isRecommended?: boolean;
+  isMostUrgent?: boolean;
   onNavigate?: () => void;
   onDonate?: (shelterId: number, itemIndex: number) => void;
 }
