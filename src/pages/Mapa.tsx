@@ -367,7 +367,7 @@ const Mapa = () => {
 
           {/* Selected shelter card overlay */}
           {selectedShelter && (
-            <div className="absolute bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-50">
+            <div className="absolute bottom-0 left-0 right-0 md:bottom-4 md:left-auto md:right-4 md:w-96 z-50">
               <ShelterCard
                 shelter={selectedShelter}
                 onClose={() => setSelectedShelter(null)}
