@@ -102,4 +102,23 @@
     0% { transform: translateX(100%); }
     100% { transform: translateX(-100%); }
   }
+
+  .rain-drop {
+    position: absolute;
+    top: -10%;
+    width: 1.5px;
+    height: 18px;
+    background: linear-gradient(to bottom, transparent, hsl(210 80% 70% / 0.5));
+    border-radius: 0 0 2px 2px;
+    animation: rain-fall linear infinite;
+  }
+
+  @keyframes rain-fall {
+    0% {
+      transform: translateY(-10vh);
+    }
+    100% {
+      transform: translateY(110vh);
+    }
+  }
 }
