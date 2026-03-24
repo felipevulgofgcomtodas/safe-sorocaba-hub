@@ -379,33 +379,8 @@ const Mapa = () => {
             </div>
           )}
 
-          {/* Legend */}
-          <div className="absolute top-4 right-4 bg-card/95 backdrop-blur-sm border border-border rounded-2xl p-3.5 z-50 shadow-lg">
-            <p className="text-xs font-bold text-foreground mb-2.5">Legenda</p>
-            <div className="space-y-1.5">
-              <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mb-1">Zonas de Risco</p>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="w-3 h-3 rounded-full bg-danger" /> Alto
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="w-3 h-3 rounded-full bg-warning" /> Médio
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="w-3 h-3 rounded-full" style={{ background: 'hsl(48 96% 53%)' }} /> Moderado
-              </div>
-              <div className="my-1.5 h-px bg-border" />
-              <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mb-1">Abrigos</p>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="w-3 h-3 rounded-full bg-safe" /> Disponível
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="w-3 h-3 rounded-full bg-warning" /> Parcial
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="w-3 h-3 rounded-full bg-danger" /> Lotado
-              </div>
-            </div>
-          </div>
+          {/* Collapsible Legend */}
+          <LegendPanel />
 
           {/* Simulation overlay */}
           {simulationMode && (
