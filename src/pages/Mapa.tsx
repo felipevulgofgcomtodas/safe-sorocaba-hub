@@ -65,6 +65,14 @@ const Mapa = () => {
     return shelterData.filter(s => s.status === filterStatus);
   }, [filterStatus, shelterData]);
 
+  const mostUrgentShelter = useMemo(() => {
+    return shelterData.reduce((worst, s) => {
+      const urgency = s.donations.reduce((sum, d) => sum + (d.needed - d.received), 0);
+      const worstUrgency = worst ? worst.donations.reduce((sum, d) => sum + (d.needed - d.received), 0) : 0;
+      return urgency > worstUrgency ? s : worst;
+    }, null as Shelter | null);
+  }, [shelterData]);
+
   const processLocation = useCallback((lat: number, lng: number) => {
     setUserLocation({ lat, lng });
     const zone = isInRiskZone(lat, lng);
