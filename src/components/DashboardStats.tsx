@@ -26,15 +26,15 @@ const AnimatedNumber = ({ target, suffix = "" }: { target: number; suffix?: stri
 };
 
 const StatCard = ({ icon: Icon, label, value, suffix, color, bgColor }: StatProps) => (
-  <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border hover:border-primary/20 transition-all group">
-    <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${bgColor} transition-colors`}>
-      <Icon className={`w-4 h-4 ${color}`} />
+  <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-card/80 border border-border/50 hover:border-primary/20 transition-all group backdrop-blur-sm">
+    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${bgColor} transition-colors flex-shrink-0`}>
+      <Icon className={`w-3.5 h-3.5 ${color}`} />
     </div>
-    <div>
-      <p className={`text-lg font-bold tabular-nums ${color}`}>
+    <div className="min-w-0">
+      <p className={`text-base font-bold tabular-nums leading-tight ${color}`}>
         <AnimatedNumber target={value} suffix={suffix} />
       </p>
-      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{label}</p>
+      <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium truncate">{label}</p>
     </div>
   </div>
 );
@@ -50,7 +50,6 @@ const DashboardStats = ({ simulationMode }: DashboardStatsProps) => {
     const interval = setInterval(() => {
       setRainLevel(prev => {
         const delta = Math.floor(Math.random() * 8) - 3;
-        const base = simulationMode ? 85 : 42;
         return Math.max(10, Math.min(100, prev + delta + (simulationMode ? 2 : 0)));
       });
     }, 5000);
