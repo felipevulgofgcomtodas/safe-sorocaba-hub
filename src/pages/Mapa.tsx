@@ -370,6 +370,7 @@ const Mapa = () => {
                 shelter={selectedShelter}
                 onClose={() => setSelectedShelter(null)}
                 isRecommended={recommended?.id === selectedShelter.id}
+                isMostUrgent={mostUrgentShelter?.id === selectedShelter.id}
                 onNavigate={() => handleNavigate(selectedShelter)}
                 onDonate={handleDonate}
               />
