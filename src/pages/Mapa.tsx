@@ -184,8 +184,6 @@ const Mapa = () => {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   };
 
-  const LegendPanel = () => {
-
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Top bar */}
