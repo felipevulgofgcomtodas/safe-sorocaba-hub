@@ -22,6 +22,7 @@ const Mapa = () => {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searching, setSearching] = useState(false);
   const [simulationMode, setSimulationMode] = useState(false);
+  const [emergencyOpen, setEmergencyOpen] = useState(false);
 
   // Auto-search user address on login
   useEffect(() => {
