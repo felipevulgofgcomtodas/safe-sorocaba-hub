@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, MapPin, X, Heart, CheckCircle, Package, ChevronDown, ChevronUp, Navigation } from "lucide-react";
+import { Users, MapPin, X, Heart, CheckCircle, Package, ChevronDown, ChevronUp, Navigation, Gift } from "lucide-react";
 import { type Shelter, getStatusLabel, getStatusColor, getTypeLabel } from "@/data/shelters";
 
 interface ShelterCardProps {
@@ -7,33 +7,43 @@ interface ShelterCardProps {
   onClose: () => void;
   isRecommended?: boolean;
   onNavigate?: () => void;
+  onDonate?: (shelterId: number, itemIndex: number) => void;
 }
 
-const ShelterCard = ({ shelter, onClose, isRecommended, onNavigate }: ShelterCardProps) => {
+const ShelterCard = ({ shelter, onClose, isRecommended, onNavigate, onDonate }: ShelterCardProps) => {
   const [showDonations, setShowDonations] = useState(false);
+  const [donatingIndex, setDonatingIndex] = useState<number | null>(null);
   const occupancyPercent = Math.round((shelter.occupied / shelter.capacity) * 100);
   const allDonationsComplete = shelter.donations.every(d => d.received >= d.needed);
 
+  const handleDonate = (i: number) => {
+    setDonatingIndex(i);
+    setTimeout(() => {
+      onDonate?.(shelter.id, i);
+      setDonatingIndex(null);
+    }, 600);
+  };
+
   return (
-    <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xl animate-in slide-in-from-bottom-4 duration-300">
+    <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
       {/* Header */}
       <div className={`px-4 py-3 flex items-center justify-between ${
         shelter.status === 'disponivel' ? 'bg-safe/15' : shelter.status === 'parcial' ? 'bg-warning/15' : 'bg-danger/15'
       }`}>
         <div className="flex items-center gap-2">
-          <span className={`w-2.5 h-2.5 rounded-full ${getStatusColor(shelter.status)}`} />
+          <span className={`w-2.5 h-2.5 rounded-full ${getStatusColor(shelter.status)} ${isRecommended ? 'animate-pulse' : ''}`} />
           <span className={`text-xs font-bold uppercase tracking-wider ${
             shelter.status === 'disponivel' ? 'text-safe' : shelter.status === 'parcial' ? 'text-warning' : 'text-danger'
           }`}>
             {getStatusLabel(shelter.status)}
           </span>
           {isRecommended && (
-            <span className="ml-2 px-2 py-0.5 rounded-full bg-safe/20 text-safe text-[10px] font-bold uppercase tracking-wider">
+            <span className="ml-2 px-2 py-0.5 rounded-full bg-safe/20 text-safe text-[10px] font-bold uppercase tracking-wider animate-pulse">
               ★ Recomendado
             </span>
           )}
         </div>
-        <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-lg hover:bg-muted/50">
+        <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-lg hover:bg-muted/50 active:scale-95">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -51,21 +61,17 @@ const ShelterCard = ({ shelter, onClose, isRecommended, onNavigate }: ShelterCar
 
         {/* Capacity */}
         <div className="grid grid-cols-3 gap-2">
-          <div className="p-2.5 rounded-xl bg-muted/40 text-center">
-            <Users className="w-4 h-4 mx-auto text-primary mb-1" />
-            <p className="text-base font-bold text-foreground tabular-nums">{shelter.capacity}</p>
-            <p className="text-[10px] text-muted-foreground">Capacidade</p>
-          </div>
-          <div className="p-2.5 rounded-xl bg-muted/40 text-center">
-            <Users className="w-4 h-4 mx-auto text-warning mb-1" />
-            <p className="text-base font-bold text-foreground tabular-nums">{shelter.occupied}</p>
-            <p className="text-[10px] text-muted-foreground">Ocupados</p>
-          </div>
-          <div className="p-2.5 rounded-xl bg-muted/40 text-center">
-            <Users className="w-4 h-4 mx-auto text-safe mb-1" />
-            <p className="text-base font-bold text-foreground tabular-nums">{shelter.capacity - shelter.occupied}</p>
-            <p className="text-[10px] text-muted-foreground">Vagas</p>
-          </div>
+          {[
+            { icon: Users, color: "text-primary", value: shelter.capacity, label: "Capacidade" },
+            { icon: Users, color: "text-warning", value: shelter.occupied, label: "Ocupados" },
+            { icon: Users, color: "text-safe", value: shelter.capacity - shelter.occupied, label: "Vagas" },
+          ].map((s, i) => (
+            <div key={i} className="p-2.5 rounded-xl bg-muted/40 text-center hover:bg-muted/60 transition-colors">
+              <s.icon className={`w-4 h-4 mx-auto ${s.color} mb-1`} />
+              <p className="text-base font-bold text-foreground tabular-nums">{s.value}</p>
+              <p className="text-[10px] text-muted-foreground">{s.label}</p>
+            </div>
+          ))}
         </div>
 
         {/* Progress */}
@@ -74,9 +80,9 @@ const ShelterCard = ({ shelter, onClose, isRecommended, onNavigate }: ShelterCar
             <span className="text-muted-foreground">Ocupação</span>
             <span className="font-semibold text-foreground tabular-nums">{occupancyPercent}%</span>
           </div>
-          <div className="h-2 rounded-full bg-muted overflow-hidden">
+          <div className="h-2.5 rounded-full bg-muted overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all duration-500 ${
+              className={`h-full rounded-full transition-all duration-700 ${
                 shelter.status === 'disponivel' ? 'bg-safe' : shelter.status === 'parcial' ? 'bg-warning' : 'bg-danger'
               }`}
               style={{ width: `${occupancyPercent}%` }}
@@ -88,7 +94,7 @@ const ShelterCard = ({ shelter, onClose, isRecommended, onNavigate }: ShelterCar
         {onNavigate && shelter.status !== 'lotado' && (
           <button
             onClick={onNavigate}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-safe text-safe-foreground font-semibold text-sm hover:bg-safe/90 transition-colors active:scale-[0.98]"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-safe text-safe-foreground font-semibold text-sm hover:bg-safe/90 transition-all active:scale-[0.97] shadow-lg shadow-safe/20"
           >
             <Navigation className="w-4 h-4" />
             Ir para abrigo seguro
@@ -98,11 +104,16 @@ const ShelterCard = ({ shelter, onClose, isRecommended, onNavigate }: ShelterCar
         {/* Donations toggle */}
         <button
           onClick={() => setShowDonations(!showDonations)}
-          className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors text-sm"
+          className="w-full flex items-center justify-between py-2.5 px-3 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors text-sm active:scale-[0.99]"
         >
           <div className="flex items-center gap-2">
             <Package className="w-4 h-4 text-primary" />
             <span className="font-medium text-foreground">Necessidades de Doação</span>
+            {!allDonationsComplete && (
+              <span className="px-1.5 py-0.5 rounded-full bg-danger/20 text-danger text-[9px] font-bold">
+                {shelter.donations.filter(d => d.received < d.needed).length} itens
+              </span>
+            )}
           </div>
           {showDonations ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
         </button>
@@ -118,20 +129,40 @@ const ShelterCard = ({ shelter, onClose, isRecommended, onNavigate }: ShelterCar
               shelter.donations.map((d, i) => {
                 const percent = Math.min(100, Math.round((d.received / d.needed) * 100));
                 const complete = d.received >= d.needed;
+                const isDonating = donatingIndex === i;
                 return (
-                  <div key={i} className="p-2.5 rounded-lg bg-muted/30">
+                  <div key={i} className="p-2.5 rounded-lg bg-muted/30 hover:bg-muted/40 transition-colors">
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-1.5">
                         <Heart className={`w-3 h-3 ${complete ? 'text-safe' : 'text-danger'}`} />
                         <span className="text-xs font-medium text-foreground">{d.item}</span>
                       </div>
-                      <span className="text-[10px] text-muted-foreground tabular-nums">
-                        {d.received}/{d.needed} {d.unit}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-muted-foreground tabular-nums">
+                          {d.received}/{d.needed} {d.unit}
+                        </span>
+                        {!complete && (
+                          <button
+                            onClick={() => handleDonate(i)}
+                            disabled={isDonating}
+                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all active:scale-95 ${
+                              isDonating
+                                ? 'bg-safe/20 text-safe'
+                                : 'bg-primary/20 text-primary hover:bg-primary/30'
+                            }`}
+                          >
+                            {isDonating ? (
+                              <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Doado!</span>
+                            ) : (
+                              <span className="flex items-center gap-1"><Gift className="w-3 h-3" /> Doar</span>
+                            )}
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                       <div
-                        className={`h-full rounded-full transition-all ${complete ? 'bg-safe' : percent > 60 ? 'bg-warning' : 'bg-danger'}`}
+                        className={`h-full rounded-full transition-all duration-500 ${complete ? 'bg-safe' : percent > 60 ? 'bg-warning' : 'bg-danger'}`}
                         style={{ width: `${percent}%` }}
                       />
                     </div>

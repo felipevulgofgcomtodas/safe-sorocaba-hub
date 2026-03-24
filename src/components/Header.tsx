@@ -1,12 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut, User } from "lucide-react";
 import { useState } from "react";
 import logoPrefeiture from "@/assets/logo-prefeitura.png";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const isHome = location.pathname === "/";
+  const { user, logout } = useAuth();
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 ${isHome ? 'glass' : 'glass-strong'}`}>
@@ -19,12 +21,28 @@ const Header = () => {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-3">
-          <Link to="/login" className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Entrar
-          </Link>
-          <Link to="/cadastro" className="px-4 py-2 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-            Cadastrar-se
-          </Link>
+          {user ? (
+            <>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-border">
+                <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
+                  <User className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <span className="text-sm font-medium text-foreground">{user.name}</span>
+              </div>
+              <button onClick={logout} className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 active:scale-[0.97]">
+                <LogOut className="w-3.5 h-3.5" /> Sair
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                Entrar
+              </Link>
+              <Link to="/cadastro" className="px-4 py-2 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors active:scale-[0.97]">
+                Cadastrar-se
+              </Link>
+            </>
+          )}
         </nav>
 
         {/* Mobile toggle */}
@@ -35,13 +53,29 @@ const Header = () => {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden glass-strong border-t border-border px-4 py-4 flex flex-col gap-3">
-          <Link to="/login" onClick={() => setMobileOpen(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
-            Entrar
-          </Link>
-          <Link to="/cadastro" onClick={() => setMobileOpen(false)} className="px-4 py-2 text-sm font-medium rounded-lg bg-primary text-primary-foreground text-center">
-            Cadastrar-se
-          </Link>
+        <div className="md:hidden glass-strong border-t border-border px-4 py-4 flex flex-col gap-3 animate-in slide-in-from-top-2 duration-200">
+          {user ? (
+            <>
+              <div className="flex items-center gap-2 px-4 py-2">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  <User className="w-4 h-4 text-primary" />
+                </div>
+                <span className="text-sm font-medium text-foreground">{user.name}</span>
+              </div>
+              <button onClick={() => { logout(); setMobileOpen(false); }} className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-2">
+                <LogOut className="w-4 h-4" /> Sair
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" onClick={() => setMobileOpen(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+                Entrar
+              </Link>
+              <Link to="/cadastro" onClick={() => setMobileOpen(false)} className="px-4 py-2 text-sm font-medium rounded-lg bg-primary text-primary-foreground text-center">
+                Cadastrar-se
+              </Link>
+            </>
+          )}
         </div>
       )}
     </header>
