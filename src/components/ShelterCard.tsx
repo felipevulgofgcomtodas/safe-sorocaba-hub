@@ -14,6 +14,7 @@ interface ShelterCardProps {
 const ShelterCard = ({ shelter, onClose, isRecommended, isMostUrgent, onNavigate, onDonate }: ShelterCardProps) => {
   const [showDonations, setShowDonations] = useState(false);
   const [donatingIndex, setDonatingIndex] = useState<number | null>(null);
+  const [minimized, setMinimized] = useState(true);
   const occupancyPercent = Math.round((shelter.occupied / shelter.capacity) * 100);
   const allDonationsComplete = shelter.donations.every(d => d.received >= d.needed);
 
@@ -27,6 +28,15 @@ const ShelterCard = ({ shelter, onClose, isRecommended, isMostUrgent, onNavigate
 
   return (
     <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
+      {/* Mobile pull handle */}
+      <button
+        onClick={() => setMinimized(!minimized)}
+        className="md:hidden w-full flex flex-col items-center py-2 cursor-grab active:cursor-grabbing"
+      >
+        <div className="w-10 h-1 rounded-full bg-muted-foreground/40" />
+        <ChevronUp className={`w-4 h-4 text-muted-foreground mt-1 transition-transform duration-300 ${minimized ? 'rotate-0' : 'rotate-180'}`} />
+      </button>
+
       {/* Header */}
       <div className={`px-4 py-3 flex items-center justify-between ${
         shelter.status === 'disponivel' ? 'bg-safe/15' : shelter.status === 'parcial' ? 'bg-warning/15' : 'bg-danger/15'
@@ -55,7 +65,7 @@ const ShelterCard = ({ shelter, onClose, isRecommended, isMostUrgent, onNavigate
       </div>
 
       {/* Body */}
-      <div className="p-4 space-y-4">
+      <div className={`p-4 space-y-4 transition-all duration-300 ${minimized ? 'max-h-0 overflow-hidden p-0 md:max-h-none md:p-4' : 'max-h-[70vh] overflow-y-auto'}`}>
         <div>
           <h3 className="font-bold text-lg text-foreground leading-tight">{shelter.name}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">{getTypeLabel(shelter.type)}</p>
