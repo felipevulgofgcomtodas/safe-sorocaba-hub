@@ -8,6 +8,9 @@ import Index from "./pages/Index.tsx";
 import Login from "./pages/Login.tsx";
 import Cadastro from "./pages/Cadastro.tsx";
 import Mapa from "./pages/Mapa.tsx";
+import Alertas from "./pages/Alertas.tsx";
+import Ocupacao from "./pages/Ocupacao.tsx";
+import Monitoramento from "./pages/Monitoramento.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();

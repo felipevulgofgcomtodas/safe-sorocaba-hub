@@ -1,21 +1,24 @@
+import { useNavigate } from "react-router-dom";
 import { Map, Bell, Shield, Users, Radio, Navigation } from "lucide-react";
 
 const features = [
-  { icon: Map, title: "Mapa Interativo", desc: "Visualize áreas de risco e pontos seguros em tempo real", color: "text-primary", bg: "bg-primary/15", pulse: false },
-  { icon: Bell, title: "Alertas em Tempo Real", desc: "Receba notificações instantâneas sobre mudanças no nível de risco", color: "text-danger", bg: "bg-danger/15", pulse: true },
-  { icon: Shield, title: "Zonas de Segurança", desc: "Encontre o abrigo mais próximo com informações de capacidade", color: "text-safe", bg: "bg-safe/15", pulse: false },
-  { icon: Users, title: "Ocupação Simulada", desc: "Acompanhe a lotação dos abrigos antes de se deslocar", color: "text-warning", bg: "bg-warning/15", pulse: true },
-  { icon: Radio, title: "Monitoramento 24h", desc: "Sistema ativo continuamente para sua proteção", color: "text-safe", bg: "bg-safe/15", pulse: true },
-  { icon: Navigation, title: "Rotas Seguras", desc: "Sugestões de trajeto para evitar áreas alagadas", color: "text-primary", bg: "bg-primary/15", pulse: false },
+  { icon: Map, title: "Mapa Interativo", desc: "Visualize áreas de risco e pontos seguros em tempo real", color: "text-primary", bg: "bg-primary/15", pulse: false, route: "/mapa" },
+  { icon: Bell, title: "Alertas em Tempo Real", desc: "Receba notificações instantâneas sobre mudanças no nível de risco", color: "text-danger", bg: "bg-danger/15", pulse: true, route: "/alertas" },
+  { icon: Shield, title: "Zonas de Segurança", desc: "Encontre o abrigo mais próximo com informações de capacidade", color: "text-safe", bg: "bg-safe/15", pulse: false, route: "/mapa?view=shelters" },
+  { icon: Users, title: "Ocupação Simulada", desc: "Acompanhe a lotação dos abrigos antes de se deslocar", color: "text-warning", bg: "bg-warning/15", pulse: true, route: "/ocupacao" },
+  { icon: Radio, title: "Monitoramento 24h", desc: "Sistema ativo continuamente para sua proteção", color: "text-safe", bg: "bg-safe/15", pulse: true, route: "/monitoramento" },
+  { icon: Navigation, title: "Rotas Seguras", desc: "Sugestões de trajeto para evitar áreas alagadas", color: "text-primary", bg: "bg-primary/15", pulse: false, route: "/mapa?view=routes" },
 ];
 
 const FeaturesSection = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="py-20 relative">
       <div className="container mx-auto px-4">
         <div className="text-center mb-14">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-3">
-            Centro de Monitoramento <span className="text-primary">Urbano</span>
+            Centro de Monitoramento Urbano
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
             Tecnologia a serviço da proteção civil de Sorocaba
@@ -24,7 +27,11 @@ const FeaturesSection = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((f) => (
-            <div key={f.title} className="group glass rounded-xl p-6 hover:border-primary/30 transition-all duration-300 cursor-pointer active:scale-[0.98]">
+            <button
+              key={f.title}
+              onClick={() => navigate(f.route)}
+              className="group glass rounded-xl p-6 hover:border-primary/30 transition-all duration-300 cursor-pointer active:scale-[0.97] text-left hover:shadow-lg hover:-translate-y-1"
+            >
               <div className={`w-12 h-12 rounded-xl ${f.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 relative`}>
                 <f.icon className={`w-5 h-5 ${f.color}`} />
                 {f.pulse && (
@@ -41,7 +48,10 @@ const FeaturesSection = () => {
                   <span className={`text-[10px] font-bold uppercase tracking-wider ${f.color}`}>Ativo agora</span>
                 </div>
               )}
-            </div>
+              <span className="mt-3 inline-flex items-center text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                Acessar →
+              </span>
+            </button>
           ))}
         </div>
       </div>
