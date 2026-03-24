@@ -5,6 +5,7 @@ import { shelters as initialShelters, riskZones, isInRiskZone, findNearestSafeSh
 import ShelterCard from "@/components/ShelterCard";
 import DashboardStats from "@/components/DashboardStats";
 import NotificationSystem from "@/components/NotificationSystem";
+import EmergencyActionModal from "@/components/EmergencyActionModal";
 import { useAuth } from "@/contexts/AuthContext";
 
 const GOOGLE_MAP_EMBED = "https://www.google.com/maps/d/embed?mid=1hVMhW-dDHDhydy0KpILvt1I57aRC7CY";
