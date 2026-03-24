@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Shield, Search, MapPin, AlertTriangle, Navigation, Users, Filter, Zap, User, LogOut } from "lucide-react";
+import { ArrowLeft, Shield, Search, MapPin, AlertTriangle, Navigation, Users, Filter, Zap, User, LogOut, ChevronUp, Info } from "lucide-react";
 import { shelters as initialShelters, riskZones, isInRiskZone, findNearestSafeShelter, getStatusLabel, getStatusColor, getTypeLabel, type Shelter } from "@/data/shelters";
 import ShelterCard from "@/components/ShelterCard";
 import DashboardStats from "@/components/DashboardStats";
