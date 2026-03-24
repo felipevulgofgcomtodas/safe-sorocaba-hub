@@ -307,6 +307,7 @@ const Mapa = () => {
             {filteredShelters.map(s => {
               const occupancy = Math.round((s.occupied / s.capacity) * 100);
               const isRec = recommended?.id === s.id;
+              const isUrgent = mostUrgentShelter?.id === s.id;
               return (
                 <button
                   key={s.id}
