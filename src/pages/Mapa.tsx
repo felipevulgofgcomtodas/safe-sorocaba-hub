@@ -163,6 +163,13 @@ const Mapa = () => {
             {simulationMode ? 'SIMULAÇÃO ATIVA' : 'Simular Enchente'}
           </button>
           <NotificationSystem />
+          <button
+            onClick={() => setEmergencyOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-danger/20 border border-danger/30 text-danger hover:bg-danger/30 transition-all active:scale-[0.96]"
+          >
+            <AlertTriangle className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">O que fazer</span>
+          </button>
           {user && (
             <div className="hidden md:flex items-center gap-2 px-2 py-1 rounded-lg bg-muted/50 border border-border">
               <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
