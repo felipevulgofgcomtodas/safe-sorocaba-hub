@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { MapContainer, TileLayer, Marker, Popup, Polygon, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
 import L from "leaflet";
 import { ArrowLeft, Shield, Users, Navigation, X, AlertTriangle, CheckCircle } from "lucide-react";
-import { shelters, riskZones, getStatusLabel, getStatusColor, getTypeLabel, type Shelter } from "@/data/shelters";
+import { shelters, riskZones, getStatusLabel, getStatusColor, getTypeLabel, getRiskLevelLabel, getRiskLevelColor, type Shelter } from "@/data/shelters";
 import "leaflet/dist/leaflet.css";
 
 // Fix default marker icons
@@ -53,7 +53,7 @@ function getIcon(status: Shelter['status']) {
 
 function MapUpdater({ center }: { center: [number, number] }) {
   const map = useMap();
-  useEffect(() => { map.setView(center, 14); }, [center, map]);
+  useEffect(() => { map.setView(center, 13); }, [center, map]);
   return null;
 }
 
@@ -63,7 +63,7 @@ const Mapa = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string>("all");
 
-  const center: [number, number] = [-23.5015, -47.4580];
+  const center: [number, number] = [-23.4955, -47.4555];
 
   const filteredShelters = useMemo(() => {
     if (filterStatus === "all") return shelters;
@@ -113,7 +113,7 @@ const Mapa = () => {
           {/* Alert banner */}
           <div className="p-3 bg-danger/10 border-b border-danger/20 flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-danger flex-shrink-0" />
-            <p className="text-xs text-danger">Alerta: 5 zonas de risco ativas em Sorocaba</p>
+            <p className="text-xs text-danger">Alerta: {riskZones.filter(z => z.level === 'alto').length} zonas de alto risco ativas</p>
           </div>
 
           {/* Nearest shelter */}
@@ -167,7 +167,6 @@ const Mapa = () => {
                     {getStatusLabel(s.status)}
                   </span>
                 </div>
-                {/* Progress bar */}
                 <div className="mt-1.5 h-1 rounded-full bg-muted overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${s.status === 'disponivel' ? 'bg-safe' : s.status === 'parcial' ? 'bg-warning' : 'bg-danger'}`}
@@ -181,35 +180,42 @@ const Mapa = () => {
 
         {/* Map */}
         <div className="flex-1 relative">
-          <MapContainer center={center} zoom={14} className="h-full w-full" zoomControl={false}>
+          <MapContainer center={center} zoom={13} className="h-full w-full" zoomControl={false}>
             <TileLayer
               url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>'
             />
             <MapUpdater center={center} />
 
-            {/* Risk zones */}
-            {riskZones.map((zone) => (
-              <Polygon
-                key={zone.name}
-                positions={zone.coords}
-                pathOptions={{
-                  color: zone.level === 'alto' ? '#ef4444' : '#eab308',
-                  fillColor: zone.level === 'alto' ? '#ef4444' : '#eab308',
-                  fillOpacity: 0.25,
-                  weight: 2,
-                }}
-              >
-                <Popup>
-                  <div className="text-sm">
-                    <strong>{zone.name}</strong><br />
-                    Nível: <span className={zone.level === 'alto' ? 'text-red-500 font-bold' : 'text-yellow-500 font-bold'}>
-                      {zone.level === 'alto' ? 'ALTO' : 'MÉDIO'}
-                    </span>
-                  </div>
-                </Popup>
-              </Polygon>
-            ))}
+            {/* Risk zones as circles */}
+            {riskZones.map((zone) => {
+              const color = getRiskLevelColor(zone.level);
+              return (
+                <Circle
+                  key={zone.name}
+                  center={zone.center}
+                  radius={zone.radius}
+                  pathOptions={{
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.18,
+                    weight: 2,
+                    opacity: 0.7,
+                    dashArray: zone.level === 'moderado' ? '8 4' : undefined,
+                  }}
+                >
+                  <Popup>
+                    <div className="text-sm">
+                      <strong>{zone.name}</strong><br />
+                      Nível: <span style={{ color, fontWeight: 'bold' }}>
+                        {getRiskLevelLabel(zone.level).toUpperCase()}
+                      </span><br />
+                      Raio: {zone.radius}m
+                    </div>
+                  </Popup>
+                </Circle>
+              );
+            })}
 
             {/* Shelters */}
             {filteredShelters.map(s => (
@@ -286,10 +292,21 @@ const Mapa = () => {
           <div className="absolute top-4 right-4 glass-strong rounded-xl p-3 z-[1000]">
             <p className="text-xs font-medium text-foreground mb-2">Legenda</p>
             <div className="space-y-1.5">
+              <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-1">Abrigos</p>
               <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="w-3 h-3 rounded-full bg-safe" /> Disponível</div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="w-3 h-3 rounded-full bg-warning" /> Parcial</div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="w-3 h-3 rounded-full bg-danger" /> Lotado</div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="w-3 h-3 rounded border border-danger bg-danger/25" /> Zona de risco</div>
+              <div className="my-1.5 h-px bg-border" />
+              <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-1">Zonas de Risco</p>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="w-3 h-3 rounded-full border-2 border-[#ef4444] bg-[#ef4444]/25" /> Alto
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="w-3 h-3 rounded-full border-2 border-[#f97316] bg-[#f97316]/25" /> Médio
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="w-3 h-3 rounded-full border-2 border-dashed border-[#eab308] bg-[#eab308]/25" /> Moderado
+              </div>
             </div>
           </div>
         </div>
