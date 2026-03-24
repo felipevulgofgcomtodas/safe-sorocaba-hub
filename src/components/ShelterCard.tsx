@@ -14,6 +14,7 @@ interface ShelterCardProps {
 const ShelterCard = ({ shelter, onClose, isRecommended, isMostUrgent, onNavigate, onDonate }: ShelterCardProps) => {
   const [showDonations, setShowDonations] = useState(false);
   const [donatingIndex, setDonatingIndex] = useState<number | null>(null);
+  const [minimized, setMinimized] = useState(true);
   const occupancyPercent = Math.round((shelter.occupied / shelter.capacity) * 100);
   const allDonationsComplete = shelter.donations.every(d => d.received >= d.needed);
 
