@@ -43,6 +43,11 @@ const ShelterCard = ({ shelter, onClose, isRecommended, isMostUrgent, onNavigate
               ★ Recomendado
             </span>
           )}
+          {isMostUrgent && (
+            <span className="ml-2 px-2 py-0.5 rounded-full bg-danger/20 text-danger text-[10px] font-bold uppercase tracking-wider animate-pulse">
+              🔥 Mais Urgente
+            </span>
+          )}
         </div>
         <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-lg hover:bg-muted/50 active:scale-95">
           <X className="w-4 h-4" />
