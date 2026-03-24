@@ -414,6 +414,7 @@ const Mapa = () => {
           )}
         </div>
       </div>
+      <EmergencyActionModal open={emergencyOpen} onClose={() => setEmergencyOpen(false)} />
     </div>
   );
 };
