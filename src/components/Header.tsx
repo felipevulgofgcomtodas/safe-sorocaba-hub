@@ -21,6 +21,9 @@ const Header = () => {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-3">
+          <Link to="/vaquinha" className="px-3 py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1.5 active:scale-[0.97]">
+            <Heart className="w-3.5 h-3.5" fill="currentColor" /> Vaquinha Solidária
+          </Link>
           {user ? (
             <>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-border">
