@@ -11,6 +11,7 @@ import Mapa from "./pages/Mapa.tsx";
 import Alertas from "./pages/Alertas.tsx";
 import Ocupacao from "./pages/Ocupacao.tsx";
 import Monitoramento from "./pages/Monitoramento.tsx";
+import Vaquinha from "./pages/Vaquinha.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
