@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, LogOut, User } from "lucide-react";
+import { Menu, X, LogOut, User, Heart } from "lucide-react";
 import { useState } from "react";
 import logoPrefeiture from "@/assets/logo-prefeitura.png";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,6 +21,9 @@ const Header = () => {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-3">
+          <Link to="/vaquinha" className="px-3 py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1.5 active:scale-[0.97]">
+            <Heart className="w-3.5 h-3.5" fill="currentColor" /> Vaquinha Solidária
+          </Link>
           {user ? (
             <>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-border">
@@ -54,6 +57,9 @@ const Header = () => {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden glass-strong border-t border-border px-4 py-4 flex flex-col gap-3 animate-in slide-in-from-top-2 duration-200">
+          <Link to="/vaquinha" onClick={() => setMobileOpen(false)} className="px-4 py-2 text-sm font-medium text-primary flex items-center gap-2">
+            <Heart className="w-4 h-4" fill="currentColor" /> Vaquinha Solidária
+          </Link>
           {user ? (
             <>
               <div className="flex items-center gap-2 px-4 py-2">

@@ -11,6 +11,7 @@ import Mapa from "./pages/Mapa.tsx";
 import Alertas from "./pages/Alertas.tsx";
 import Ocupacao from "./pages/Ocupacao.tsx";
 import Monitoramento from "./pages/Monitoramento.tsx";
+import Vaquinha from "./pages/Vaquinha.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/alertas" element={<Alertas />} />
             <Route path="/ocupacao" element={<Ocupacao />} />
             <Route path="/monitoramento" element={<Monitoramento />} />
+            <Route path="/vaquinha" element={<Vaquinha />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
