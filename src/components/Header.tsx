@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, LogOut, User } from "lucide-react";
+import { Menu, X, LogOut, User, Heart } from "lucide-react";
 import { useState } from "react";
 import logoPrefeiture from "@/assets/logo-prefeitura.png";
 import { useAuth } from "@/contexts/AuthContext";
