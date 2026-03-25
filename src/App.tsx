@@ -35,6 +35,7 @@ const App = () => (
             <Route path="/vaquinha" element={<Vaquinha />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <WhatsAppButton />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
