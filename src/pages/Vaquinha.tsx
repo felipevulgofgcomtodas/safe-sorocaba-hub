@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Heart, TrendingUp, Users, ShieldCheck, Clock, DollarSign, Eye, CheckCircle } from "lucide-react";
+import { Heart, TrendingUp, Users, ShieldCheck, Clock, DollarSign, Eye, CheckCircle, CreditCard, Smartphone, Copy, QrCode, X } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 const FIRST_NAMES = ["Maria", "João", "Ana", "Carlos", "Fernanda", "Pedro", "Juliana", "Lucas", "Beatriz", "Rafael", "Camila", "Gustavo", "Larissa", "Thiago", "Isabela", "Mateus", "Amanda", "Bruno", "Letícia", "Diego"];
@@ -18,6 +18,7 @@ const CATEGORIES = [
 ];
 
 const DONATION_AMOUNTS = [10, 25, 50, 100];
+const PIX_KEY = "safeflood@sorocaba.sp.gov.br";
 
 interface Donation {
   id: number;
@@ -69,6 +70,11 @@ const Vaquinha = () => {
   const [customAmount, setCustomAmount] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [nextId, setNextId] = useState(100);
+  const [paymentMethod, setPaymentMethod] = useState<"pix" | "card">("pix");
+  const [showPixModal, setShowPixModal] = useState(false);
+  const [pixCopied, setPixCopied] = useState(false);
+  const [cardForm, setCardForm] = useState({ name: "", number: "", expiry: "", cvv: "" });
+  const [processingPayment, setProcessingPayment] = useState(false);
   const goal = 50000;
 
   const addDonation = useCallback((amount: number, userName?: string) => {
@@ -85,7 +91,6 @@ const Vaquinha = () => {
     setHistory(prev => [newDon, ...prev.slice(0, 19)]);
   }, [nextId]);
 
-  // Auto-generate donations
   useEffect(() => {
     const interval = setInterval(() => {
       const d = generateDonation(Date.now(), 0);
@@ -96,14 +101,55 @@ const Vaquinha = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleDonate = () => {
-    const amount = selectedAmount || Number(customAmount);
+  const getDonationAmount = () => selectedAmount || Number(customAmount) || 0;
+
+  const handleDonatePix = () => {
+    const amount = getDonationAmount();
     if (!amount || amount <= 0) return;
+    setShowPixModal(true);
+  };
+
+  const confirmPixPayment = () => {
+    const amount = getDonationAmount();
     addDonation(amount);
+    setShowPixModal(false);
     setShowSuccess(true);
     setSelectedAmount(null);
     setCustomAmount("");
     setTimeout(() => setShowSuccess(false), 4000);
+  };
+
+  const handleDonateCard = () => {
+    const amount = getDonationAmount();
+    if (!amount || amount <= 0) return;
+    if (!cardForm.name || !cardForm.number || !cardForm.expiry || !cardForm.cvv) return;
+    setProcessingPayment(true);
+    setTimeout(() => {
+      addDonation(amount);
+      setProcessingPayment(false);
+      setShowSuccess(true);
+      setSelectedAmount(null);
+      setCustomAmount("");
+      setCardForm({ name: "", number: "", expiry: "", cvv: "" });
+      setTimeout(() => setShowSuccess(false), 4000);
+    }, 2000);
+  };
+
+  const copyPix = () => {
+    navigator.clipboard.writeText(PIX_KEY);
+    setPixCopied(true);
+    setTimeout(() => setPixCopied(false), 3000);
+  };
+
+  const formatCardNumber = (val: string) => {
+    const digits = val.replace(/\D/g, "").slice(0, 16);
+    return digits.replace(/(.{4})/g, "$1 ").trim();
+  };
+
+  const formatExpiry = (val: string) => {
+    const digits = val.replace(/\D/g, "").slice(0, 4);
+    if (digits.length > 2) return digits.slice(0, 2) + "/" + digits.slice(2);
+    return digits;
   };
 
   const progress = Math.min((totalRaised / goal) * 100, 100);
@@ -182,6 +228,7 @@ const Vaquinha = () => {
                 <Heart className="w-5 h-5 text-primary" /> Faça sua doação
               </h2>
 
+              {/* Amount selection */}
               <div className="grid grid-cols-2 gap-3 mb-4">
                 {DONATION_AMOUNTS.map(amt => (
                   <button key={amt} onClick={() => { setSelectedAmount(amt); setCustomAmount(""); }}
@@ -208,11 +255,98 @@ const Vaquinha = () => {
                 </div>
               </div>
 
-              <button onClick={handleDonate}
-                disabled={!selectedAmount && !customAmount}
-                className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-bold text-base hover:bg-primary/90 transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-primary/20">
-                💙 Doar agora
-              </button>
+              {/* Payment method tabs */}
+              <div className="flex gap-2 mb-6">
+                <button onClick={() => setPaymentMethod("pix")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all ${
+                    paymentMethod === "pix"
+                      ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-2 border-emerald-500/40"
+                      : "bg-muted/50 text-muted-foreground border border-border hover:bg-muted"
+                  }`}>
+                  <Smartphone className="w-4 h-4" /> PIX
+                </button>
+                <button onClick={() => setPaymentMethod("card")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all ${
+                    paymentMethod === "card"
+                      ? "bg-primary/10 text-primary border-2 border-primary/40"
+                      : "bg-muted/50 text-muted-foreground border border-border hover:bg-muted"
+                  }`}>
+                  <CreditCard className="w-4 h-4" /> Cartão
+                </button>
+              </div>
+
+              {/* PIX section */}
+              {paymentMethod === "pix" && (
+                <div className="space-y-4 animate-in fade-in duration-300">
+                  <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                    <p className="text-sm font-medium text-foreground mb-2">Chave PIX:</p>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 text-sm bg-background px-3 py-2 rounded-lg border border-border text-foreground truncate">
+                        {PIX_KEY}
+                      </code>
+                      <button onClick={copyPix}
+                        className="px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 transition-colors text-sm font-medium flex items-center gap-1.5 active:scale-[0.97]">
+                        {pixCopied ? <><CheckCircle className="w-3.5 h-3.5" /> Copiada!</> : <><Copy className="w-3.5 h-3.5" /> Copiar</>}
+                      </button>
+                    </div>
+                  </div>
+
+                  <button onClick={handleDonatePix}
+                    disabled={!getDonationAmount()}
+                    className="w-full py-4 rounded-xl bg-emerald-600 text-white font-bold text-base hover:bg-emerald-700 transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
+                    <QrCode className="w-5 h-5" /> Pagar com PIX
+                  </button>
+                </div>
+              )}
+
+              {/* Card section */}
+              {paymentMethod === "card" && (
+                <div className="space-y-3 animate-in fade-in duration-300">
+                  <div>
+                    <label className="text-sm text-muted-foreground mb-1 block">Nome no cartão</label>
+                    <input type="text" placeholder="Nome completo"
+                      value={cardForm.name}
+                      onChange={e => setCardForm(f => ({ ...f, name: e.target.value }))}
+                      className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-sm" />
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground mb-1 block">Número do cartão</label>
+                    <input type="text" placeholder="0000 0000 0000 0000"
+                      value={cardForm.number}
+                      onChange={e => setCardForm(f => ({ ...f, number: formatCardNumber(e.target.value) }))}
+                      maxLength={19}
+                      className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-sm tabular-nums" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm text-muted-foreground mb-1 block">Validade</label>
+                      <input type="text" placeholder="MM/AA"
+                        value={cardForm.expiry}
+                        onChange={e => setCardForm(f => ({ ...f, expiry: formatExpiry(e.target.value) }))}
+                        maxLength={5}
+                        className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-sm tabular-nums" />
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground mb-1 block">CVV</label>
+                      <input type="text" placeholder="123"
+                        value={cardForm.cvv}
+                        onChange={e => setCardForm(f => ({ ...f, cvv: e.target.value.replace(/\D/g, "").slice(0, 4) }))}
+                        maxLength={4}
+                        className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-sm tabular-nums" />
+                    </div>
+                  </div>
+
+                  <button onClick={handleDonateCard}
+                    disabled={!getDonationAmount() || processingPayment || !cardForm.name || !cardForm.number || !cardForm.expiry || !cardForm.cvv}
+                    className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-bold text-base hover:bg-primary/90 transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-primary/20 flex items-center justify-center gap-2 mt-2">
+                    {processingPayment ? (
+                      <><div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" /> Processando...</>
+                    ) : (
+                      <><CreditCard className="w-5 h-5" /> Doar com cartão</>
+                    )}
+                  </button>
+                </div>
+              )}
 
               {showSuccess && (
                 <div className="mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -245,7 +379,7 @@ const Vaquinha = () => {
                 <Clock className="w-5 h-5 text-primary" /> Doações recentes
               </h2>
 
-              <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+              <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
                 {history.map((d, i) => (
                   <div key={d.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/50 hover:bg-muted/50 transition-colors"
                     style={{ animationDelay: `${i * 60}ms` }}>
@@ -305,6 +439,61 @@ const Vaquinha = () => {
       </main>
 
       <Footer />
+
+      {/* PIX Modal */}
+      {showPixModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-card border border-border rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <QrCode className="w-5 h-5 text-emerald-500" /> Pagar com PIX
+              </h3>
+              <button onClick={() => setShowPixModal(false)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+                <X className="w-5 h-5 text-muted-foreground" />
+              </button>
+            </div>
+
+            <div className="text-center mb-6">
+              <p className="text-sm text-muted-foreground mb-1">Valor da doação</p>
+              <p className="text-3xl font-bold text-foreground tabular-nums">R$ {getDonationAmount()}</p>
+            </div>
+
+            {/* QR Code visual */}
+            <div className="flex justify-center mb-6">
+              <div className="w-48 h-48 bg-white rounded-xl p-3 shadow-inner border border-border">
+                <div className="w-full h-full grid grid-cols-8 grid-rows-8 gap-[2px]">
+                  {Array.from({ length: 64 }).map((_, i) => (
+                    <div key={i} className={`rounded-[1px] ${
+                      Math.random() > 0.4 ? "bg-gray-900" : "bg-white"
+                    }`} />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              <div className="p-3 rounded-xl bg-muted/50 border border-border">
+                <p className="text-xs text-muted-foreground mb-1">Chave PIX</p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-sm text-foreground truncate">{PIX_KEY}</code>
+                  <button onClick={copyPix} className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
+                    {pixCopied ? <><CheckCircle className="w-3 h-3" /> Copiada</> : <><Copy className="w-3 h-3" /> Copiar</>}
+                  </button>
+                </div>
+              </div>
+
+              <p className="text-xs text-center text-muted-foreground">
+                Escaneie o QR Code ou copie a chave PIX para realizar o pagamento
+              </p>
+            </div>
+
+            <button onClick={confirmPixPayment}
+              className="w-full py-4 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-all active:scale-[0.97] shadow-lg shadow-emerald-600/20">
+              ✅ Confirmar pagamento
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

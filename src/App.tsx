@@ -13,6 +13,7 @@ import Ocupacao from "./pages/Ocupacao.tsx";
 import Monitoramento from "./pages/Monitoramento.tsx";
 import Vaquinha from "./pages/Vaquinha.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import WhatsAppButton from "./components/WhatsAppButton";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/vaquinha" element={<Vaquinha />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <WhatsAppButton />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
