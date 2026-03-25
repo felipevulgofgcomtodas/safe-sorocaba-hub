@@ -57,6 +57,9 @@ const Header = () => {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden glass-strong border-t border-border px-4 py-4 flex flex-col gap-3 animate-in slide-in-from-top-2 duration-200">
+          <Link to="/vaquinha" onClick={() => setMobileOpen(false)} className="px-4 py-2 text-sm font-medium text-primary flex items-center gap-2">
+            <Heart className="w-4 h-4" fill="currentColor" /> Vaquinha Solidária
+          </Link>
           {user ? (
             <>
               <div className="flex items-center gap-2 px-4 py-2">
