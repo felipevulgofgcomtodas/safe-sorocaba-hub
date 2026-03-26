@@ -12,6 +12,7 @@ import Alertas from "./pages/Alertas.tsx";
 import Ocupacao from "./pages/Ocupacao.tsx";
 import Monitoramento from "./pages/Monitoramento.tsx";
 import Vaquinha from "./pages/Vaquinha.tsx";
+import Chat from "./pages/Chat.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import WhatsAppButton from "./components/WhatsAppButton";
 
