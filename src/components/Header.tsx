@@ -22,7 +22,10 @@ const Header = () => {
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-3">
           <Link to="/vaquinha" className="px-3 py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1.5 active:scale-[0.97]">
-            <Heart className="w-3.5 h-3.5" fill="currentColor" /> Vaquinha Solidária
+            <Heart className="w-3.5 h-3.5" fill="currentColor" /> Vaquinha
+          </Link>
+          <Link to="/chat" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 active:scale-[0.97]">
+            <MessageCircle className="w-3.5 h-3.5" /> Chat
           </Link>
           {user ? (
             <>
