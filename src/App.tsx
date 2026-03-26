@@ -34,6 +34,7 @@ const App = () => (
             <Route path="/ocupacao" element={<Ocupacao />} />
             <Route path="/monitoramento" element={<Monitoramento />} />
             <Route path="/vaquinha" element={<Vaquinha />} />
+            <Route path="/chat" element={<Chat />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <WhatsAppButton />
