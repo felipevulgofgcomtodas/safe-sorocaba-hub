@@ -61,7 +61,10 @@ const Header = () => {
       {mobileOpen && (
         <div className="md:hidden glass-strong border-t border-border px-4 py-4 flex flex-col gap-3 animate-in slide-in-from-top-2 duration-200">
           <Link to="/vaquinha" onClick={() => setMobileOpen(false)} className="px-4 py-2 text-sm font-medium text-primary flex items-center gap-2">
-            <Heart className="w-4 h-4" fill="currentColor" /> Vaquinha Solidária
+            <Heart className="w-4 h-4" fill="currentColor" /> Vaquinha
+          </Link>
+          <Link to="/chat" onClick={() => setMobileOpen(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-2">
+            <MessageCircle className="w-4 h-4" /> Chat da Cidade
           </Link>
           {user ? (
             <>
