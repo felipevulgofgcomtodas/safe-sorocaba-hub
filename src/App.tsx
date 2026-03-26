@@ -12,6 +12,7 @@ import Alertas from "./pages/Alertas.tsx";
 import Ocupacao from "./pages/Ocupacao.tsx";
 import Monitoramento from "./pages/Monitoramento.tsx";
 import Vaquinha from "./pages/Vaquinha.tsx";
+import Chat from "./pages/Chat.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import WhatsAppButton from "./components/WhatsAppButton";
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/ocupacao" element={<Ocupacao />} />
             <Route path="/monitoramento" element={<Monitoramento />} />
             <Route path="/vaquinha" element={<Vaquinha />} />
+            <Route path="/chat" element={<Chat />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <WhatsAppButton />
