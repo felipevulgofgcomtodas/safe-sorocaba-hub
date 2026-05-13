@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Send, MapPin, ThumbsUp, AlertTriangle, MessageCircle, Filter } from "lucide-react";
+import { ArrowLeft, Send, MapPin, ThumbsUp, AlertTriangle, MessageCircle, Filter, Users } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
