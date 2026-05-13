@@ -32,11 +32,11 @@ const Header = () => {
           </Link>
           {user ? (
             <>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-border">
-                <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-default">
+                <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center border border-primary/20">
                   <User className="w-3.5 h-3.5 text-primary" />
                 </div>
-                <span className="text-sm font-medium text-foreground">{user.name}</span>
+                <span className="text-sm font-bold text-foreground/90">{user.name}</span>
               </div>
               <button onClick={logout} className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 active:scale-[0.97]">
                 <LogOut className="w-3.5 h-3.5" /> Sair
