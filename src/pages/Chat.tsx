@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Send, MapPin, ThumbsUp, AlertTriangle, MessageCircle, Filter } from "lucide-react";
+import { ArrowLeft, Send, MapPin, ThumbsUp, AlertTriangle, MessageCircle, Filter, Users } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
@@ -193,43 +193,43 @@ const Chat = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background mesh-gradient flex flex-col">
       {/* Header */}
-      <header className="glass-strong border-b border-border sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-14 flex items-center gap-3">
-          <Link to="/" className="p-2 rounded-lg hover:bg-muted/50 transition-colors active:scale-95">
+      <header className="glass-strong border-b border-white/5 sticky top-0 z-50 shadow-xl">
+        <div className="container mx-auto px-4 h-16 flex items-center gap-3">
+          <Link to="/" className="p-2.5 rounded-xl hover:bg-white/5 transition-all active:scale-90 bg-white/5 border border-white/5">
             <ArrowLeft className="w-5 h-5 text-foreground" />
           </Link>
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <MessageCircle className="w-5 h-5 text-primary shrink-0" />
-            <h1 className="font-display font-bold text-foreground truncate">Chat da Cidade</h1>
-            <span className="text-xs text-muted-foreground hidden sm:inline">Sorocaba</span>
+          <div className="flex flex-col flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-primary shrink-0" />
+              <h1 className="font-display font-bold text-foreground truncate text-lg">Chat da Cidade</h1>
+            </div>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Sorocaba • Ao Vivo</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-xs text-muted-foreground">{messages.length} msgs</span>
+          <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 flex items-center gap-2">
+             <Users className="w-3.5 h-3.5 text-primary" />
+             <span className="text-xs font-bold tabular-nums">{messages.length + 12}</span>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="container mx-auto px-4 pb-2 flex gap-2 overflow-x-auto scrollbar-hide">
+        <div className="container mx-auto px-4 pb-3 flex gap-2 overflow-x-auto scrollbar-hide no-scrollbar">
           {CATEGORIES.map(c => (
             <button
               key={c.value}
               onClick={() => setFilter(c.value)}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95",
+                "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 border",
                 filter === c.value
-                  ? "bg-primary text-primary-foreground shadow-md"
-                  : "bg-muted/50 text-muted-foreground hover:bg-muted border border-border"
+                  ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20"
+                  : "bg-white/5 text-muted-foreground hover:text-foreground border-white/5 hover:bg-white/10"
               )}
             >
-              <span>{c.icon}</span> {c.label}
-              {c.value !== "todos" && (
-                <span className="ml-0.5 opacity-70">
-                  {messages.filter(m => c.value === "todos" || m.category === c.value).length}
-                </span>
-              )}
+              <span className="text-sm">{c.icon}</span> {c.label}
             </button>
           ))}
         </div>
@@ -247,53 +247,53 @@ const Chat = () => {
           <div
             key={msg.id}
             className={cn(
-              "max-w-[85%] md:max-w-[70%] animate-fade-in",
+              "max-w-[85%] md:max-w-[70%] animate-in fade-in slide-in-from-bottom-2 duration-300",
               msg.isOwn ? "ml-auto" : "mr-auto"
             )}
           >
             <div
               className={cn(
-                "rounded-2xl px-4 py-3 relative transition-all",
+                "rounded-2xl px-4 py-3 relative transition-all shadow-sm border",
                 msg.isOwn
-                  ? "bg-primary text-primary-foreground rounded-br-md"
+                  ? "bg-primary text-primary-foreground rounded-br-none border-primary shadow-primary/10"
                   : msg.isAlert
-                  ? "bg-destructive/15 border border-destructive/30 rounded-bl-md"
-                  : "bg-muted/60 border border-border rounded-bl-md"
+                  ? "bg-destructive/10 border-destructive/20 rounded-bl-none"
+                  : "bg-white/5 border-white/5 rounded-bl-none backdrop-blur-md"
               )}
             >
               {/* Author + time */}
               {!msg.isOwn && (
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-bold text-foreground">{msg.author}</span>
-                  <span className={cn("text-[10px] px-1.5 py-0.5 rounded-full font-semibold", categoryColor(msg.category))}>
-                    {CATEGORIES.find(c => c.value === msg.category)?.icon}
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-xs font-bold text-foreground/90">{msg.author}</span>
+                  <span className={cn("text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider", categoryColor(msg.category))}>
+                    {CATEGORIES.find(c => c.value === msg.category)?.label}
                   </span>
-                  <span className="text-[10px] text-muted-foreground ml-auto">{timeAgo(msg.time)}</span>
+                  <span className="text-[10px] text-muted-foreground ml-auto tabular-nums">{timeAgo(msg.time)}</span>
                 </div>
               )}
 
               {/* Alert badge */}
               {msg.isAlert && !msg.isOwn && (
-                <div className="flex items-center gap-1 mb-1.5">
+                <div className="flex items-center gap-1.5 mb-2 px-2 py-1 rounded-lg bg-destructive/10 border border-destructive/20 w-fit">
                   <AlertTriangle className="w-3 h-3 text-destructive" />
-                  <span className="text-[10px] font-bold text-destructive uppercase tracking-wider">Alerta</span>
+                  <span className="text-[9px] font-black text-destructive uppercase tracking-widest">ALERTA CRÍTICO</span>
                 </div>
               )}
 
-              <p className={cn("text-sm leading-relaxed", msg.isOwn ? "text-primary-foreground" : "text-foreground")}>
+              <p className={cn("text-sm leading-relaxed", msg.isOwn ? "text-primary-foreground font-medium" : "text-foreground/90")}>
                 {msg.text}
               </p>
 
               {/* Location */}
               {msg.location && (
-                <div className={cn("flex items-center gap-1 mt-1.5", msg.isOwn ? "text-primary-foreground/70" : "text-muted-foreground")}>
+                <div className={cn("flex items-center gap-1.5 mt-2 pt-2 border-t", msg.isOwn ? "border-white/10 text-primary-foreground/70" : "border-white/5 text-muted-foreground")}>
                   <MapPin className="w-3 h-3" />
-                  <span className="text-[10px]">{msg.location}</span>
+                  <span className="text-[10px] font-medium">{msg.location}</span>
                 </div>
               )}
 
               {msg.isOwn && (
-                <div className="text-[10px] text-primary-foreground/60 text-right mt-1">{timeAgo(msg.time)}</div>
+                <div className="text-[10px] text-primary-foreground/60 text-right mt-1.5 font-medium tabular-nums">{timeAgo(msg.time)}</div>
               )}
             </div>
 

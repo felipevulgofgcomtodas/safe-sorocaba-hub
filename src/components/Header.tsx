@@ -11,12 +11,15 @@ const Header = () => {
   const { user, logout } = useAuth();
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 ${isHome ? 'glass' : 'glass-strong'}`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isHome ? 'glass' : 'glass-strong shadow-lg'}`}>
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3">
-          <img src={logoPrefeiture} alt="Prefeitura de Sorocaba" className="h-10 w-auto" />
-          <div className="h-8 w-px bg-border" />
-          <span className="font-display font-bold text-lg text-foreground">SafeFlood <span className="text-primary">Sorocaba</span></span>
+        <Link to="/" className="flex items-center gap-3 group transition-transform active:scale-95">
+          <div className="relative">
+            <img src={logoPrefeiture} alt="Prefeitura de Sorocaba" className="h-10 w-auto drop-shadow-lg group-hover:brightness-110 transition-all" />
+            <div className="absolute -inset-2 bg-primary/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+          <div className="h-6 w-px bg-white/10 mx-1" />
+          <span className="font-display font-bold text-lg text-foreground tracking-tight">SafeFlood <span className="text-primary">Sorocaba</span></span>
         </Link>
 
         {/* Desktop nav */}
@@ -29,11 +32,11 @@ const Header = () => {
           </Link>
           {user ? (
             <>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-border">
-                <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-default">
+                <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center border border-primary/20">
                   <User className="w-3.5 h-3.5 text-primary" />
                 </div>
-                <span className="text-sm font-medium text-foreground">{user.name}</span>
+                <span className="text-sm font-bold text-foreground/90">{user.name}</span>
               </div>
               <button onClick={logout} className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 active:scale-[0.97]">
                 <LogOut className="w-3.5 h-3.5" /> Sair
