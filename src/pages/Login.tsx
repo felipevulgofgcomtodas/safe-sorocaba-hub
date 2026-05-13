@@ -33,13 +33,18 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Voltar
-        </Link>
+    <div className="min-h-screen bg-background mesh-gradient flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md animate-in fade-in zoom-in duration-500">
+        <div className="flex justify-start mb-6">
+          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group">
+            <div className="p-1.5 rounded-full bg-muted/50 group-hover:bg-muted transition-colors">
+              <ArrowLeft className="w-4 h-4" />
+            </div>
+            Voltar ao Início
+          </Link>
+        </div>
 
-        <div className="glass-strong rounded-2xl p-8">
+        <div className="glass-strong rounded-3xl p-8 border border-white/5 shadow-2xl">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
               <Shield className="w-5 h-5 text-primary-foreground" />
