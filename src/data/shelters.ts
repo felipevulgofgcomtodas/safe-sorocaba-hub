@@ -181,6 +181,22 @@ export const shelters: Shelter[] = [
   ]},
 ];
 
+export interface SafeZone {
+  name: string;
+  center: [number, number];
+  radius: number;
+  description: string;
+}
+
+export const safeZones: SafeZone[] = [
+  { name: "Campolim", center: [-23.5110, -47.4762], radius: 1100, description: "Bairro elevado, sem histórico de inundações" },
+  { name: "Wanel Ville", center: [-23.4750, -47.4600], radius: 850, description: "Região elevada, bom escoamento pluvial" },
+  { name: "Brigadeiro Tobias", center: [-23.4870, -47.4350], radius: 750, description: "Área elevada, historicamente segura" },
+  { name: "Caguassu", center: [-23.5200, -47.4300], radius: 700, description: "Terreno alto, boa infraestrutura de drenagem" },
+  { name: "Jardim Vergueiro (cotas altas)", center: [-23.4840, -47.4530], radius: 600, description: "Subida do bairro, fora da planície de inundação" },
+  { name: "Parque Tecnológico", center: [-23.5000, -47.4350], radius: 650, description: "Área elevada, longe dos córregos" },
+];
+
 export const riskZones: RiskZone[] = [
   { name: "Av. Dom Aguirre (Marginal do Rio)", level: "alto", center: [-23.5015, -47.4526], radius: 1500 },
   { name: "Parque das Águas", level: "alto", center: [-23.4968, -47.4512], radius: 1200 },
