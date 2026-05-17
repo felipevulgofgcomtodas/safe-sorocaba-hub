@@ -113,7 +113,7 @@ const ShelterCard = ({ shelter, onClose, isRecommended, isMostUrgent, onNavigate
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-safe text-safe-foreground font-semibold text-sm hover:bg-safe/90 transition-all active:scale-[0.97] shadow-lg shadow-safe/20"
           >
             <Navigation className="w-4 h-4" />
-            Ir para abrigo seguro
+            Como chegar
           </button>
         )}
 

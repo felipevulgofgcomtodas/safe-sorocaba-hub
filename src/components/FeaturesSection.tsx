@@ -1,13 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { Map, Bell, Shield, Users, Radio, Navigation, ArrowRight } from "lucide-react";
+import { Map, Bell, Shield, Package, Radio, Heart, ArrowRight } from "lucide-react";
 
 const features = [
-  { icon: Map, title: "Mapa Interativo", desc: "Áreas de risco e pontos seguros em tempo real", color: "text-primary", bg: "bg-primary/10", borderHover: "hover:border-primary/40", pulse: false, route: "/mapa" },
-  { icon: Bell, title: "Alertas em Tempo Real", desc: "Notificações instantâneas sobre mudanças de risco", color: "text-danger", bg: "bg-danger/10", borderHover: "hover:border-danger/40", pulse: true, route: "/alertas" },
-  { icon: Shield, title: "Zonas de Segurança", desc: "Abrigos mais próximos com capacidade atualizada", color: "text-safe", bg: "bg-safe/10", borderHover: "hover:border-safe/40", pulse: false, route: "/mapa?view=shelters" },
-  { icon: Users, title: "Ocupação Simulada", desc: "Lotação dos abrigos antes de se deslocar", color: "text-warning", bg: "bg-warning/10", borderHover: "hover:border-warning/40", pulse: true, route: "/ocupacao" },
-  { icon: Radio, title: "Monitoramento 24h", desc: "Sensores ativos monitorando rios e chuvas", color: "text-safe", bg: "bg-safe/10", borderHover: "hover:border-safe/40", pulse: true, route: "/monitoramento" },
-  { icon: Navigation, title: "Rotas Seguras", desc: "Trajetos inteligentes evitando áreas alagadas", color: "text-primary", bg: "bg-primary/10", borderHover: "hover:border-primary/40", pulse: false, route: "/mapa?view=routes" },
+  { icon: Map,     title: "Mapa Interativo",      desc: "Áreas de risco, zonas seguras e pontos de coleta",         color: "text-primary", bg: "bg-primary/10", borderHover: "hover:border-primary/40", pulse: false, route: "/mapa" },
+  { icon: Bell,    title: "Alertas em Tempo Real", desc: "Notificações instantâneas sobre mudanças de risco",         color: "text-danger",  bg: "bg-danger/10",  borderHover: "hover:border-danger/40",  pulse: true,  route: "/alertas" },
+  { icon: Shield,  title: "Pontos de Coleta",      desc: "3 pontos reais de coleta com endereço e capacidade",        color: "text-safe",    bg: "bg-safe/10",    borderHover: "hover:border-safe/40",    pulse: false, route: "/ocupacao" },
+  { icon: Package, title: "Capacidade de Estoque", desc: "Cestas, kits e água: acompanhe o estoque por item",         color: "text-warning", bg: "bg-warning/10", borderHover: "hover:border-warning/40", pulse: true,  route: "/ocupacao" },
+  { icon: Radio,   title: "Monitoramento 24h",     desc: "Sensores ativos monitorando rios e chuvas",                 color: "text-safe",    bg: "bg-safe/10",    borderHover: "hover:border-safe/40",    pulse: true,  route: "/monitoramento" },
+  { icon: Heart,   title: "Registrar Doação",      desc: "Veja o que é necessário e registre sua contribuição",       color: "text-primary", bg: "bg-primary/10", borderHover: "hover:border-primary/40", pulse: false, route: "/doacoes" },
 ];
 
 const FeaturesSection = () => {

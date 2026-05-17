@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Bell, AlertTriangle, Info, ShieldAlert, Phone, CheckCircle2, Clock, MapPin } from "lucide-react";
+import { ArrowLeft, Bell, AlertTriangle, Info, ShieldAlert, Phone, CheckCircle2, Clock, MapPin, Calendar, ExternalLink, Trash2 } from "lucide-react";
 import Header from "@/components/Header";
 
 interface Alert {
@@ -201,6 +201,106 @@ const Alertas = () => {
               </div>
             </div>
           </div>
+
+          {/* Informações Operacionais */}
+          <div className="mt-10">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-display text-xl font-bold text-foreground">Informações Operacionais</h2>
+                <p className="text-sm text-muted-foreground">Calendário e capacidade do plano logístico</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="glass rounded-xl p-4 border border-warning/20">
+                <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mb-1">Ativação do plano</p>
+                <p className="text-2xl font-display font-bold text-warning">Agosto</p>
+                <p className="text-xs text-muted-foreground mt-1">2 meses antes do pico de chuvas</p>
+              </div>
+              <div className="glass rounded-xl p-4 border border-danger/20">
+                <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mb-1">Mês crítico</p>
+                <p className="text-2xl font-display font-bold text-danger">Outubro</p>
+                <p className="text-xs text-muted-foreground mt-1">Maior volume de chuvas esperado</p>
+              </div>
+            </div>
+
+            <div className="glass rounded-xl p-5 mb-4">
+              <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mb-3">Capacidade total estimada (todos os pontos)</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { label: "Cestas Básicas",  range: "2.000–3.000 un" },
+                  { label: "Kits de Higiene", range: "2.400–3.500 un" },
+                  { label: "Kits de Limpeza", range: "1.600–2.400 un" },
+                  { label: "Água",            range: "7.500–11.000 L" },
+                ].map(t => (
+                  <div key={t.label} className="text-center p-3 rounded-lg bg-muted/30">
+                    <p className="text-sm font-bold text-foreground tabular-nums">{t.range}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{t.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="glass rounded-xl p-5">
+              <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mb-3">Status dos kits produzidos</p>
+              <div className="space-y-2">
+                {[
+                  { tipo: "Kits de alimentos 72h (individual)", qtd: 45 },
+                  { tipo: "Kits de alimentos 7 dias (família 4 pessoas)", qtd: 10 },
+                  { tipo: "Kits de higiene", qtd: 114 },
+                ].map(k => (
+                  <div key={k.tipo} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                    <p className="text-sm text-foreground">{k.tipo}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold text-safe tabular-nums">{k.qtd}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-safe/10 text-safe font-bold">100% conformidade</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Links Úteis — Descarte */}
+          <div className="mt-10">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl bg-safe/15 flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-safe" />
+              </div>
+              <div>
+                <h2 className="font-display text-xl font-bold text-foreground">Descarte de Alimentos Vencidos</h2>
+                <p className="text-sm text-muted-foreground">Parceiros de descarte responsável em Sorocaba</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[
+                { nome: "Sorocaba Ambiental",       url: "https://www.sorocabaambiental.com.br/",    desc: "Gestão ambiental municipal" },
+                { nome: "Grupo DS Ambiental",        url: "https://dsambiental.com.br/",              desc: "Gestão de resíduos orgânicos" },
+                { nome: "Sorolix Ambiental",         url: "https://bio.site/sorolixambiental",        desc: "Coleta e destinação de resíduos" },
+                { nome: "Banco de Alimentos",        url: "https://www.bancoalimentos.org.br/",       desc: "Redistribuição de alimentos próximos ao vencimento" },
+                { nome: "Ecoponto Vila Helena",      url: "https://mapa.abrecon.org.br/ecoponto/939/ecoponto-vila-helena", desc: "Ecoponto municipal de descarte" },
+              ].map(link => (
+                <a
+                  key={link.nome}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="glass rounded-xl p-4 flex items-center justify-between gap-3 hover:border-safe/40 border border-transparent transition-all group hover:-translate-y-0.5"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-foreground group-hover:text-safe transition-colors">{link.nome}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{link.desc}</p>
+                  </div>
+                  <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-safe transition-colors flex-shrink-0" />
+                </a>
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
