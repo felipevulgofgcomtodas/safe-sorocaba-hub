@@ -1,0 +1,232 @@
+// Centralized static data — used as fallback when Supabase tables are empty
+
+export const PONTOS_COLETA = [
+  {
+    id: "1",
+    nome: "Comunidade Santa Bárbara",
+    endereco: "Rua Luiz Geraldo Franco de Mendonça, 150 - Jardim das Estrelas, Sorocaba - SP, 18017-310",
+    latitude: -23.4972,
+    longitude: -47.4581,
+    tipo: "Comunitário",
+    capacidade: 600,
+    ocupados: 15,
+    ativo: true,
+    itens: [
+      { item: "Cestas Básicas",  needed: 600,  received: 15, unit: "un" },
+      { item: "Kits de Higiene", needed: 700,  received: 38, unit: "un" },
+      { item: "Kits de Limpeza", needed: 500,  received: 0,  unit: "un" },
+      { item: "Água",            needed: 2000, received: 0,  unit: "L"  },
+    ],
+  },
+  {
+    id: "2",
+    nome: "Paróquia Santo Antônio",
+    endereco: "R. Martins de Oliveira, 229 - Vila Haro, Sorocaba - SP, 18015-245",
+    latitude: -23.5021,
+    longitude: -47.4472,
+    tipo: "Paroquial",
+    capacidade: 900,
+    ocupados: 15,
+    ativo: true,
+    itens: [
+      { item: "Cestas Básicas",  needed: 900,  received: 15, unit: "un" },
+      { item: "Kits de Higiene", needed: 1000, received: 38, unit: "un" },
+      { item: "Kits de Limpeza", needed: 700,  received: 0,  unit: "un" },
+      { item: "Água",            needed: 3000, received: 0,  unit: "L"  },
+    ],
+  },
+  {
+    id: "3",
+    nome: "Paróquia São Carlos Borromeu",
+    endereco: "Av. Dr. Eugênio Salerno, 166 - Centro, Sorocaba - SP, 18035-430",
+    latitude: -23.5014,
+    longitude: -47.4584,
+    tipo: "Paroquial",
+    capacidade: 1500,
+    ocupados: 15,
+    ativo: true,
+    itens: [
+      { item: "Cestas Básicas",  needed: 1500, received: 15, unit: "un" },
+      { item: "Kits de Higiene", needed: 1800, received: 38, unit: "un" },
+      { item: "Kits de Limpeza", needed: 1200, received: 0,  unit: "un" },
+      { item: "Água",            needed: 6000, received: 0,  unit: "L"  },
+    ],
+  },
+] as const;
+
+export const AREAS_RISCO = [
+  { id: "1", nome: "Avenida Dom Aguirre",               nivel: "alto",     latitude: -23.5034, longitude: -47.4602, raio_metros: 1200, ativo: true },
+  { id: "2", nome: "Avenida Ipanema",                   nivel: "alto",     latitude: -23.4837, longitude: -47.4716, raio_metros: 1000, ativo: true },
+  { id: "3", nome: "Avenida Afonso Vergueiro",          nivel: "medio",    latitude: -23.5095, longitude: -47.4548, raio_metros: 800,  ativo: true },
+  { id: "4", nome: "Terminal Rodoviário Santo Antônio", nivel: "medio",    latitude: -23.5064, longitude: -47.4571, raio_metros: 600,  ativo: true },
+  { id: "5", nome: "Jardim Abaeté",                     nivel: "moderado", latitude: -23.5408, longitude: -47.4348, raio_metros: 700,  ativo: true },
+  { id: "6", nome: "Vitória Régia",                     nivel: "moderado", latitude: -23.5588, longitude: -47.4625, raio_metros: 600,  ativo: true },
+] as const;
+
+export const SAFE_ZONES = [
+  { nome: "Campolim",                     latitude: -23.5110, longitude: -47.4762, raio_metros: 1100, descricao: "Bairro elevado, sem histórico de inundações" },
+  { nome: "Wanel Ville",                  latitude: -23.4750, longitude: -47.4600, raio_metros: 850,  descricao: "Região elevada, bom escoamento pluvial" },
+  { nome: "Brigadeiro Tobias",            latitude: -23.4870, longitude: -47.4350, raio_metros: 750,  descricao: "Área elevada, historicamente segura" },
+  { nome: "Caguassu",                     latitude: -23.5200, longitude: -47.4300, raio_metros: 700,  descricao: "Terreno alto, boa infraestrutura de drenagem" },
+  { nome: "Jardim Vergueiro (cotas altas)", latitude: -23.4840, longitude: -47.4530, raio_metros: 600, descricao: "Subida do bairro, fora da planície de inundação" },
+  { nome: "Parque Tecnológico",           latitude: -23.5000, longitude: -47.4350, raio_metros: 650,  descricao: "Área elevada, longe dos córregos" },
+] as const;
+
+export const KITS_ITENS = [
+  {
+    id: "72h",
+    titulo: "Kit Alimentar 72h",
+    subtitulo: "Individual",
+    cor: "text-amber-500",
+    bg: "bg-amber-500/10",
+    border: "border-amber-500/20",
+    itens: [
+      "Água mineral 500ml (6 unidades)",
+      "Barra de cereal (4 unidades)",
+      "Atum em lata (2 unidades)",
+      "Biscoito integral (2 pacotes)",
+      "Leite longa vida 200ml (2 unidades)",
+    ],
+    pvps: "PVPS 7.1 — Aprovado ABNT NBR 15596",
+    produzidos: 45,
+  },
+  {
+    id: "7dias",
+    titulo: "Kit Alimentar 7 Dias",
+    subtitulo: "Família (4 pessoas)",
+    cor: "text-orange-500",
+    bg: "bg-orange-500/10",
+    border: "border-orange-500/20",
+    itens: [
+      "Arroz 2kg (2 pacotes)",
+      "Feijão 1kg (2 pacotes)",
+      "Macarrão 500g (3 pacotes)",
+      "Óleo de soja 900ml (1 unidade)",
+      "Farinha de mandioca 1kg",
+      "Sal 1kg",
+      "Açúcar 1kg",
+    ],
+    pvps: "PVPS 7.2 — Aprovado ABNT NBR 15596",
+    produzidos: 10,
+  },
+  {
+    id: "higiene",
+    titulo: "Kit de Higiene",
+    subtitulo: "Pessoal",
+    cor: "text-blue-400",
+    bg: "bg-blue-400/10",
+    border: "border-blue-400/20",
+    itens: [
+      "Sabonete (2 unidades)",
+      "Shampoo 200ml",
+      "Escova + creme dental",
+      "Papel higiênico (4 rolos)",
+      "Absorvente (1 pacote)",
+      "Máscara descartável (5 unidades)",
+    ],
+    pvps: "PVPS 7.3 — Aprovado ANVISA",
+    produzidos: 114,
+  },
+  {
+    id: "limpeza",
+    titulo: "Kit de Limpeza",
+    subtitulo: "Doméstico",
+    cor: "text-purple-400",
+    bg: "bg-purple-400/10",
+    border: "border-purple-400/20",
+    itens: [
+      "Detergente 500ml",
+      "Desinfetante 1L",
+      "Hipoclorito de sódio 1L",
+      "Esponja de limpeza (2 unidades)",
+      "Luva de borracha (par)",
+      "Saco de lixo 100L (5 unidades)",
+    ],
+    pvps: "PVPS 7.4 — Aprovado ANVISA",
+    produzidos: 0,
+  },
+] as const;
+
+export const CAMPANHAS_FALLBACK = [
+  {
+    id: "c1",
+    titulo: "Kits Alimentares de Emergência",
+    descricao: "Financie cestas básicas e kits de 72h para famílias deslocadas pelas enchentes. Cada R$ 50 alimenta uma família por 3 dias.",
+    meta: 25000,
+    valor_arrecadado: 8450,
+    chave_pix: "safeflood@sorocaba.sp.gov.br",
+    ativa: true,
+  },
+  {
+    id: "c2",
+    titulo: "Kits de Higiene e Limpeza",
+    descricao: "Garanta dignidade e saúde para as famílias nos pontos de coleta. Kits com itens essenciais de higiene pessoal e limpeza doméstica.",
+    meta: 15000,
+    valor_arrecadado: 4200,
+    chave_pix: "safeflood.higiene@sorocaba.sp.gov.br",
+    ativa: true,
+  },
+  {
+    id: "c3",
+    titulo: "Água Potável para Sorocaba",
+    descricao: "Contribua com o fornecimento de água mineral e purificada. Meta: 11.000 litros distribuídos nos 3 pontos de coleta.",
+    meta: 10000,
+    valor_arrecadado: 2100,
+    chave_pix: "safeflood.agua@sorocaba.sp.gov.br",
+    ativa: true,
+  },
+] as const;
+
+export const CRONOGRAMA = [
+  {
+    mes: "Ago/2025",
+    titulo: "Ativação do Sistema",
+    descricao: "Lançamento oficial do SafeFlood Sorocaba. Abertura dos 3 pontos de coleta e início do monitoramento contínuo.",
+    status: "planejado",
+    cor: "text-primary",
+    bg: "bg-primary/10",
+    border: "border-primary/30",
+  },
+  {
+    mes: "Set/2025",
+    titulo: "Campanha de Doações",
+    descricao: "Intensificação das campanhas de arrecadação de kits alimentares, higiene e limpeza antes do período crítico.",
+    status: "planejado",
+    cor: "text-warning",
+    bg: "bg-warning/10",
+    border: "border-warning/30",
+  },
+  {
+    mes: "Out/2025",
+    titulo: "Pico das Enchentes",
+    descricao: "Período de maior risco. Equipes em alerta máximo. Distribuição de kits e ativação do chat de emergência.",
+    status: "critico",
+    cor: "text-danger",
+    bg: "bg-danger/10",
+    border: "border-danger/30",
+  },
+  {
+    mes: "Nov/2025",
+    titulo: "Recuperação",
+    descricao: "Apoio à recuperação das comunidades afetadas. Distribuição dos kits de limpeza e retorno à normalidade.",
+    status: "planejado",
+    cor: "text-safe",
+    bg: "bg-safe/10",
+    border: "border-safe/30",
+  },
+] as const;
+
+export const HABILIDADES_VOLUNTARIO = [
+  "Primeiros Socorros",
+  "Logística e Transporte",
+  "Distribuição de Alimentos",
+  "Atendimento Psicológico",
+  "Construção/Reparos",
+  "Comunicação/Redes Sociais",
+  "Enfermagem",
+  "Tradução (libras/idiomas)",
+  "Cozinha",
+  "TI/Tecnologia",
+] as const;
+
+export const SOROCABA_CENTER: [number, number] = [-23.5015, -47.4526];

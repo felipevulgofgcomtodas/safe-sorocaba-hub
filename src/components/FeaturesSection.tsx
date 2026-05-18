@@ -1,13 +1,16 @@
 import { useNavigate } from "react-router-dom";
-import { Map, Bell, Shield, Package, Radio, Heart, ArrowRight } from "lucide-react";
+import { Map, Bell, Shield, Package, Radio, Heart, UserCheck, MessageCircle, CalendarDays, ArrowRight } from "lucide-react";
 
 const features = [
-  { icon: Map,     title: "Mapa Interativo",      desc: "Áreas de risco, zonas seguras e pontos de coleta",         color: "text-primary", bg: "bg-primary/10", borderHover: "hover:border-primary/40", pulse: false, route: "/mapa" },
-  { icon: Bell,    title: "Alertas em Tempo Real", desc: "Notificações instantâneas sobre mudanças de risco",         color: "text-danger",  bg: "bg-danger/10",  borderHover: "hover:border-danger/40",  pulse: true,  route: "/alertas" },
-  { icon: Shield,  title: "Pontos de Coleta",      desc: "3 pontos reais de coleta com endereço e capacidade",        color: "text-safe",    bg: "bg-safe/10",    borderHover: "hover:border-safe/40",    pulse: false, route: "/ocupacao" },
-  { icon: Package, title: "Capacidade de Estoque", desc: "Cestas, kits e água: acompanhe o estoque por item",         color: "text-warning", bg: "bg-warning/10", borderHover: "hover:border-warning/40", pulse: true,  route: "/ocupacao" },
-  { icon: Radio,   title: "Monitoramento 24h",     desc: "Sensores ativos monitorando rios e chuvas",                 color: "text-safe",    bg: "bg-safe/10",    borderHover: "hover:border-safe/40",    pulse: true,  route: "/monitoramento" },
-  { icon: Heart,   title: "Registrar Doação",      desc: "Veja o que é necessário e registre sua contribuição",       color: "text-primary", bg: "bg-primary/10", borderHover: "hover:border-primary/40", pulse: false, route: "/doacoes" },
+  { icon: Map,         title: "Mapa Interativo",      desc: "Áreas de risco, zonas seguras e pontos de coleta em tempo real",  color: "text-primary", bg: "bg-primary/10", borderHover: "hover:border-primary/40", pulse: false, route: "/mapa" },
+  { icon: Bell,        title: "Alertas em Tempo Real", desc: "Notificações instantâneas sobre mudanças de risco",               color: "text-danger",  bg: "bg-danger/10",  borderHover: "hover:border-danger/40",  pulse: true,  route: "/alertas" },
+  { icon: Shield,      title: "Pontos de Coleta",      desc: "3 pontos reais com endereço, capacidade e estoque",               color: "text-safe",    bg: "bg-safe/10",    borderHover: "hover:border-safe/40",    pulse: false, route: "/ocupacao" },
+  { icon: Package,     title: "Kits & Doações",        desc: "Cestas, higiene, limpeza e água — acompanhe e contribua",         color: "text-warning", bg: "bg-warning/10", borderHover: "hover:border-warning/40", pulse: true,  route: "/doacoes" },
+  { icon: Heart,       title: "Vaquinha Solidária",    desc: "3 campanhas ativas com PIX e acompanhamento de arrecadação",      color: "text-primary", bg: "bg-primary/10", borderHover: "hover:border-primary/40", pulse: false, route: "/vaquinha" },
+  { icon: UserCheck,   title: "Voluntários",           desc: "Cadastre-se e ajude as famílias afetadas pelas enchentes",        color: "text-safe",    bg: "bg-safe/10",    borderHover: "hover:border-safe/40",    pulse: false, route: "/voluntarios" },
+  { icon: MessageCircle, title: "Chat Comunitário",   desc: "Chat em tempo real via Supabase Realtime para coordenação",       color: "text-primary", bg: "bg-primary/10", borderHover: "hover:border-primary/40", pulse: true,  route: "/chat" },
+  { icon: Radio,       title: "Monitoramento 24h",     desc: "Precipitação via Open-Meteo, sensores ativos",                   color: "text-safe",    bg: "bg-safe/10",    borderHover: "hover:border-safe/40",    pulse: true,  route: "/monitoramento" },
+  { icon: CalendarDays, title: "Cronograma",           desc: "Timeline Aug–Nov/2025 com contagem regressiva para o pico",      color: "text-warning", bg: "bg-warning/10", borderHover: "hover:border-warning/40", pulse: false, route: "/cronograma" },
 ];
 
 const FeaturesSection = () => {
@@ -29,14 +32,14 @@ const FeaturesSection = () => {
           </p>
         </div>
 
-        {/* Mobile: 2-column grid, Desktop: 3-column */}
+        {/* 3-column grid */}
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
           {features.map((f, idx) => (
             <button
               key={f.title}
               onClick={() => navigate(f.route)}
               className={`group glass rounded-xl md:rounded-2xl p-4 md:p-6 ${f.borderHover} transition-all duration-300 cursor-pointer active:scale-[0.97] text-left hover:shadow-xl hover:-translate-y-1 animate-fade-in border border-transparent`}
-              style={{ animationDelay: `${idx * 80}ms` }}
+              style={{ animationDelay: `${idx * 60}ms` }}
             >
               <div className={`w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl ${f.bg} flex items-center justify-center mb-3 md:mb-5 group-hover:scale-110 transition-transform duration-300 relative`}>
                 <f.icon className={`w-4 h-4 md:w-6 md:h-6 ${f.color}`} />

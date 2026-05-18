@@ -1,129 +1,91 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Send, MapPin, ThumbsUp, AlertTriangle, MessageCircle, Filter, Users } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { ArrowLeft, Send, MapPin, AlertTriangle, MessageCircle, Filter } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import type { MensagemChat } from "@/integrations/supabase/types";
 
-type Category = "todos" | "enchentes" | "transito" | "abrigos" | "alertas";
+type Tipo = MensagemChat["tipo"] | "todos";
 
-interface ChatMessage {
-  id: string;
-  author: string;
-  text: string;
-  time: Date;
-  category: Category;
-  location?: string;
-  likes: number;
-  liked: boolean;
-  isAlert: boolean;
-  isOwn: boolean;
-}
-
-const CATEGORIES: { value: Category; label: string; icon: string }[] = [
-  { value: "todos", label: "Todos", icon: "💬" },
-  { value: "enchentes", label: "Enchentes", icon: "🌊" },
-  { value: "transito", label: "Trânsito", icon: "🚗" },
-  { value: "abrigos", label: "Abrigos", icon: "🏠" },
-  { value: "alertas", label: "Alertas", icon: "🚨" },
+const TIPOS: { value: Tipo; label: string; icon: string }[] = [
+  { value: "todos",      label: "Todos",      icon: "💬" },
+  { value: "geral",      label: "Geral",      icon: "📢" },
+  { value: "urgente",    label: "Urgente",    icon: "🚨" },
+  { value: "voluntario", label: "Voluntários",icon: "🤝" },
+  { value: "doacao",     label: "Doações",    icon: "💙" },
 ];
 
 const LOCATIONS = [
-  "Centro", "Av. Dom Aguirre", "Marginal do Rio Sorocaba", "Jd. Europa",
-  "Av. Afonso Vergueiro", "Região do Shopping Iguatemi", "Vila Hortência",
-  "Parque Campolim", "Jd. Santa Rosália", "Av. Ipanema", "Região do CIC",
-  "Av. General Carneiro", "Vila Barão", "Wanel Ville", "Éden",
+  "Centro", "Av. Dom Aguirre", "Marginal do Rio Sorocaba",
+  "Av. Afonso Vergueiro", "Vila Haro", "Jardim das Estrelas",
+  "Parque Campolim", "Wanel Ville", "Vitória Régia",
 ];
 
-const SIMULATED: { text: string; category: Category; location?: string; isAlert: boolean }[] = [
-  { text: "Aqui na marginal está tudo parado, água subindo rápido", category: "enchentes", location: "Marginal do Rio Sorocaba", isAlert: true },
-  { text: "Trânsito parado próximo ao shopping, desviem pela Itavuvu", category: "transito", location: "Região do Shopping Iguatemi", isAlert: false },
-  { text: "Abrigo do CIC ainda tem vagas, pessoal!", category: "abrigos", location: "Região do CIC", isAlert: false },
-  { text: "⚠️ Rua alagada próximo ao centro — evitar passagem", category: "enchentes", location: "Centro", isAlert: true },
-  { text: "Na Afonso Vergueiro começou a alagar, cuidado!", category: "enchentes", location: "Av. Afonso Vergueiro", isAlert: true },
-  { text: "Semáforo apagado na Dom Aguirre, trânsito lento", category: "transito", location: "Av. Dom Aguirre", isAlert: false },
-  { text: "Voluntários distribuindo água no abrigo da UNISO", category: "abrigos", location: "Jd. Santa Rosália", isAlert: false },
-  { text: "Nível do rio subindo na Vila Hortência, fiquem atentos", category: "enchentes", location: "Vila Hortência", isAlert: true },
-  { text: "Trânsito fluindo bem pela Raposo Tavares sentido interior", category: "transito", isAlert: false },
-  { text: "Precisamos de cobertores no abrigo Éden", category: "abrigos", location: "Éden", isAlert: false },
-  { text: "Chuva forte prevista para as próximas 2h na região norte", category: "alertas", isAlert: true },
-  { text: "Desvio pela Av. Ipanema funcionando bem agora", category: "transito", location: "Av. Ipanema", isAlert: false },
-  { text: "Água baixou um pouco na Barão, mas ainda com risco", category: "enchentes", location: "Vila Barão", isAlert: false },
-  { text: "Abrigo Campolim recebendo famílias, ainda tem espaço", category: "abrigos", location: "Parque Campolim", isAlert: false },
-  { text: "🚨 Deslizamento reportado no Wanel Ville", category: "alertas", location: "Wanel Ville", isAlert: true },
+const SEED_MSGS: MensagemChat[] = [
+  { id: "s1", autor: "Defesa Civil",  texto: "Sistema SafeFlood ativo. Em caso de emergência ligue 199 (Defesa Civil) ou 193 (Bombeiros).", tipo: "urgente",    localizacao: null, data: new Date(Date.now() - 600000).toISOString() },
+  { id: "s2", autor: "Ana C.",         texto: "Alguém sabe o horário de funcionamento do ponto de coleta da Paróquia Santo Antônio?",         tipo: "geral",      localizacao: "Vila Haro", data: new Date(Date.now() - 300000).toISOString() },
+  { id: "s3", autor: "Pedro H.",       texto: "Precisam de voluntários para distribuição de kits na Comunidade Santa Bárbara sábado às 9h.", tipo: "voluntario", localizacao: "Jardim das Estrelas", data: new Date(Date.now() - 120000).toISOString() },
 ];
 
-const NAMES = [
-  "Ana C.", "Carlos M.", "Fernanda S.", "João P.", "Mariana L.",
-  "Pedro H.", "Juliana R.", "Roberto A.", "Camila F.", "Lucas D.",
-  "Beatriz N.", "Thiago O.", "Patrícia G.", "Rafael T.", "Anônimo",
-];
-
-function timeAgo(date: Date): string {
-  const s = Math.floor((Date.now() - date.getTime()) / 1000);
-  if (s < 60) return "agora";
+function timeAgo(iso: string): string {
+  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60)  return "agora";
   const m = Math.floor(s / 60);
-  if (m < 60) return `há ${m} min`;
-  const h = Math.floor(m / 60);
-  return `há ${h}h`;
+  if (m < 60)  return `há ${m}min`;
+  return `há ${Math.floor(m / 60)}h`;
 }
 
-let nextId = 1;
-const mkId = () => `msg-${nextId++}`;
+function inferTipo(text: string): MensagemChat["tipo"] {
+  if (/alaga|enchente|água|rio|perigo|urg/i.test(text)) return "urgente";
+  if (/voluntár|ajud|equipe/i.test(text))                return "voluntario";
+  if (/doa[çc]|kit|cesta/i.test(text))                  return "doacao";
+  return "geral";
+}
+
+const tipoColors: Record<MensagemChat["tipo"], string> = {
+  geral:      "bg-muted text-muted-foreground",
+  urgente:    "bg-red-500/20 text-red-400",
+  voluntario: "bg-green-500/20 text-green-400",
+  doacao:     "bg-blue-500/20 text-blue-400",
+};
 
 const Chat = () => {
-  const { user } = useAuth();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<MensagemChat[]>(SEED_MSGS);
   const [input, setInput] = useState("");
-  const [filter, setFilter] = useState<Category>("todos");
+  const [filter, setFilter] = useState<Tipo>("todos");
   const [showLocation, setShowLocation] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState("");
+  const [location, setLocation] = useState("");
+  const [autor, setAutor] = useState("");
+  const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const simIdx = useRef(0);
 
-  // Seed initial messages
+  // Load recent messages from Supabase
   useEffect(() => {
-    const seed: ChatMessage[] = [];
-    for (let i = 0; i < 6; i++) {
-      const s = SIMULATED[i % SIMULATED.length];
-      seed.push({
-        id: mkId(),
-        author: NAMES[Math.floor(Math.random() * NAMES.length)],
-        text: s.text,
-        time: new Date(Date.now() - (6 - i) * 120000),
-        category: s.category,
-        location: s.location,
-        likes: Math.floor(Math.random() * 12),
-        liked: false,
-        isAlert: s.isAlert,
-        isOwn: false,
+    supabase
+      .from("mensagens_chat")
+      .select("*")
+      .order("data", { ascending: false })
+      .limit(50)
+      .then(({ data }) => {
+        if (data?.length) {
+          setMessages([...SEED_MSGS, ...data.reverse()]);
+        }
       });
-    }
-    setMessages(seed);
-    simIdx.current = 6;
   }, []);
 
-  // Simulated incoming messages
+  // Realtime subscription
   useEffect(() => {
-    const interval = setInterval(() => {
-      const s = SIMULATED[simIdx.current % SIMULATED.length];
-      simIdx.current++;
-      setMessages(prev => [
-        ...prev,
-        {
-          id: mkId(),
-          author: NAMES[Math.floor(Math.random() * NAMES.length)],
-          text: s.text,
-          time: new Date(),
-          category: s.category,
-          location: s.location,
-          likes: 0,
-          liked: false,
-          isAlert: s.isAlert,
-          isOwn: false,
-        },
-      ]);
-    }, 8000 + Math.random() * 7000);
-    return () => clearInterval(interval);
+    const channel = supabase
+      .channel("chat-room")
+      .on<MensagemChat>(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "mensagens_chat" },
+        payload => {
+          setMessages(prev => [...prev, payload.new]);
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   // Auto-scroll
@@ -131,105 +93,78 @@ const Chat = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = useCallback(() => {
+  const handleSend = useCallback(async () => {
     const text = input.trim();
     if (!text) return;
-    const category: Category = text.match(/alag|enchente|água|rio/i)
-      ? "enchentes"
-      : text.match(/trânsito|parado|semáforo/i)
-      ? "transito"
-      : text.match(/abrigo|vaga/i)
-      ? "abrigos"
-      : text.match(/alert|perigo|cuidado|urgente/i)
-      ? "alertas"
-      : "todos";
-
-    setMessages(prev => [
-      ...prev,
-      {
-        id: mkId(),
-        author: user?.name || "Você",
-        text,
-        time: new Date(),
-        category,
-        location: selectedLocation || undefined,
-        likes: 0,
-        liked: false,
-        isAlert: false,
-        isOwn: true,
-      },
-    ]);
-    setInput("");
-    setSelectedLocation("");
-    setShowLocation(false);
-  }, [input, user, selectedLocation]);
-
-  const toggleLike = (id: string) => {
-    setMessages(prev =>
-      prev.map(m =>
-        m.id === id
-          ? { ...m, liked: !m.liked, likes: m.liked ? m.likes - 1 : m.likes + 1 }
-          : m
-      )
-    );
-  };
-
-  const toggleAlert = (id: string) => {
-    setMessages(prev =>
-      prev.map(m => (m.id === id ? { ...m, isAlert: !m.isAlert } : m))
-    );
-  };
-
-  const filtered = filter === "todos" ? messages : messages.filter(m => m.category === filter);
-
-  const categoryColor = (c: Category) => {
-    switch (c) {
-      case "enchentes": return "bg-blue-500/20 text-blue-400";
-      case "transito": return "bg-yellow-500/20 text-yellow-400";
-      case "abrigos": return "bg-green-500/20 text-green-400";
-      case "alertas": return "bg-red-500/20 text-red-400";
-      default: return "bg-muted text-muted-foreground";
+    setSending(true);
+    const msg: Omit<MensagemChat, "id"> = {
+      autor: autor.trim() || "Anônimo",
+      texto: text,
+      tipo: inferTipo(text),
+      localizacao: location || null,
+      data: new Date().toISOString(),
+    };
+    try {
+      const { data, error } = await supabase.from("mensagens_chat").insert(msg).select().single();
+      if (error || !data) {
+        // Fallback: add locally
+        setMessages(prev => [...prev, { ...msg, id: `local-${Date.now()}` }]);
+      }
+      // If success, Realtime will append it — but add locally too as Realtime may be delayed
+      setMessages(prev => {
+        if (data && !prev.find(m => m.id === data.id)) return [...prev, data];
+        return prev;
+      });
+    } catch {
+      setMessages(prev => [...prev, { ...msg, id: `local-${Date.now()}` }]);
     }
-  };
+    setInput("");
+    setLocation("");
+    setShowLocation(false);
+    setSending(false);
+  }, [input, autor, location]);
+
+  const filtered = filter === "todos" ? messages : messages.filter(m => m.tipo === filter);
+  const unread = messages.filter(m => m.tipo === "urgente").length;
 
   return (
-    <div className="min-h-screen bg-background mesh-gradient flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="glass-strong border-b border-white/5 sticky top-0 z-50 shadow-xl">
-        <div className="container mx-auto px-4 h-16 flex items-center gap-3">
-          <Link to="/" className="p-2.5 rounded-xl hover:bg-white/5 transition-all active:scale-90 bg-white/5 border border-white/5">
+      <header className="glass-strong border-b border-border sticky top-0 z-50">
+        <div className="container mx-auto px-4 h-14 flex items-center gap-3">
+          <Link to="/" className="p-2 rounded-lg hover:bg-muted/50 transition-colors active:scale-95">
             <ArrowLeft className="w-5 h-5 text-foreground" />
           </Link>
-          <div className="flex flex-col flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-primary shrink-0" />
-              <h1 className="font-display font-bold text-foreground truncate text-lg">Chat da Cidade</h1>
-            </div>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Sorocaba • Ao Vivo</span>
-            </div>
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <MessageCircle className="w-5 h-5 text-primary shrink-0" />
+            <h1 className="font-display font-bold text-foreground truncate">Chat Comunitário</h1>
+            <span className="text-xs text-muted-foreground hidden sm:inline">Sorocaba</span>
           </div>
-          <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 flex items-center gap-2">
-             <Users className="w-3.5 h-3.5 text-primary" />
-             <span className="text-xs font-bold tabular-nums">{messages.length + 12}</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-safe animate-pulse" />
+            <span className="text-xs text-muted-foreground tabular-nums">{messages.length}</span>
+            {unread > 0 && (
+              <span className="px-1.5 py-0.5 rounded-full bg-danger/20 text-danger text-[9px] font-bold">{unread} urgentes</span>
+            )}
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="container mx-auto px-4 pb-3 flex gap-2 overflow-x-auto scrollbar-hide no-scrollbar">
-          {CATEGORIES.map(c => (
-            <button
-              key={c.value}
-              onClick={() => setFilter(c.value)}
+        {/* Type filters */}
+        <div className="container mx-auto px-4 pb-2 flex gap-2 overflow-x-auto scrollbar-hide">
+          {TIPOS.map(t => (
+            <button key={t.value} onClick={() => setFilter(t.value)}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 border",
-                filter === c.value
-                  ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20"
-                  : "bg-white/5 text-muted-foreground hover:text-foreground border-white/5 hover:bg-white/10"
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95",
+                filter === t.value
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "bg-muted/50 text-muted-foreground hover:bg-muted border border-border"
+              )}>
+              <span>{t.icon}</span> {t.label}
+              {t.value !== "todos" && (
+                <span className="ml-0.5 opacity-70">
+                  {messages.filter(m => m.tipo === t.value).length}
+                </span>
               )}
-            >
-              <span className="text-sm">{c.icon}</span> {c.label}
             </button>
           ))}
         </div>
@@ -243,86 +178,49 @@ const Chat = () => {
             <p className="text-sm">Nenhuma mensagem neste filtro ainda.</p>
           </div>
         )}
-        {filtered.map((msg) => (
-          <div
-            key={msg.id}
-            className={cn(
-              "max-w-[85%] md:max-w-[70%] animate-in fade-in slide-in-from-bottom-2 duration-300",
-              msg.isOwn ? "ml-auto" : "mr-auto"
-            )}
-          >
-            <div
-              className={cn(
-                "rounded-2xl px-4 py-3 relative transition-all shadow-sm border",
-                msg.isOwn
-                  ? "bg-primary text-primary-foreground rounded-br-none border-primary shadow-primary/10"
-                  : msg.isAlert
-                  ? "bg-destructive/10 border-destructive/20 rounded-bl-none"
-                  : "bg-white/5 border-white/5 rounded-bl-none backdrop-blur-md"
-              )}
-            >
-              {/* Author + time */}
-              {!msg.isOwn && (
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-xs font-bold text-foreground/90">{msg.author}</span>
-                  <span className={cn("text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider", categoryColor(msg.category))}>
-                    {CATEGORIES.find(c => c.value === msg.category)?.label}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground ml-auto tabular-nums">{timeAgo(msg.time)}</span>
-                </div>
-              )}
-
-              {/* Alert badge */}
-              {msg.isAlert && !msg.isOwn && (
-                <div className="flex items-center gap-1.5 mb-2 px-2 py-1 rounded-lg bg-destructive/10 border border-destructive/20 w-fit">
-                  <AlertTriangle className="w-3 h-3 text-destructive" />
-                  <span className="text-[9px] font-black text-destructive uppercase tracking-widest">ALERTA CRÍTICO</span>
-                </div>
-              )}
-
-              <p className={cn("text-sm leading-relaxed", msg.isOwn ? "text-primary-foreground font-medium" : "text-foreground/90")}>
-                {msg.text}
-              </p>
-
-              {/* Location */}
-              {msg.location && (
-                <div className={cn("flex items-center gap-1.5 mt-2 pt-2 border-t", msg.isOwn ? "border-white/10 text-primary-foreground/70" : "border-white/5 text-muted-foreground")}>
-                  <MapPin className="w-3 h-3" />
-                  <span className="text-[10px] font-medium">{msg.location}</span>
-                </div>
-              )}
-
-              {msg.isOwn && (
-                <div className="text-[10px] text-primary-foreground/60 text-right mt-1.5 font-medium tabular-nums">{timeAgo(msg.time)}</div>
-              )}
-            </div>
-
-            {/* Actions */}
-            {!msg.isOwn && (
-              <div className="flex items-center gap-3 mt-1 px-2">
-                <button
-                  onClick={() => toggleLike(msg.id)}
-                  className={cn(
-                    "flex items-center gap-1 text-[11px] transition-all active:scale-90",
-                    msg.liked ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <ThumbsUp className={cn("w-3 h-3", msg.liked && "fill-primary")} />
-                  {msg.likes > 0 && msg.likes}
-                </button>
-                <button
-                  onClick={() => toggleAlert(msg.id)}
-                  className={cn(
-                    "flex items-center gap-1 text-[11px] transition-all active:scale-90",
-                    msg.isAlert ? "text-destructive font-semibold" : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <AlertTriangle className={cn("w-3 h-3", msg.isAlert && "fill-destructive/30")} /> Alerta
-                </button>
+        {filtered.map(msg => {
+          const isOwn = msg.autor === (autor || "Anônimo") && msg.id.startsWith("local-");
+          return (
+            <div key={msg.id} className={cn("max-w-[85%] md:max-w-[70%]", isOwn ? "ml-auto" : "mr-auto")}>
+              <div className={cn(
+                "rounded-2xl px-4 py-3",
+                isOwn
+                  ? "bg-primary text-primary-foreground rounded-br-md"
+                  : msg.tipo === "urgente"
+                  ? "bg-destructive/15 border border-destructive/30 rounded-bl-md"
+                  : "bg-muted/60 border border-border rounded-bl-md"
+              )}>
+                {!isOwn && (
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-bold text-foreground">{msg.autor}</span>
+                    <span className={cn("text-[10px] px-1.5 py-0.5 rounded-full font-semibold", tipoColors[msg.tipo])}>
+                      {TIPOS.find(t => t.value === msg.tipo)?.icon}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground ml-auto">{timeAgo(msg.data)}</span>
+                  </div>
+                )}
+                {msg.tipo === "urgente" && !isOwn && (
+                  <div className="flex items-center gap-1 mb-1.5">
+                    <AlertTriangle className="w-3 h-3 text-destructive" />
+                    <span className="text-[10px] font-bold text-destructive uppercase tracking-wide">Urgente</span>
+                  </div>
+                )}
+                <p className={cn("text-sm leading-relaxed", isOwn ? "text-primary-foreground" : "text-foreground")}>
+                  {msg.texto}
+                </p>
+                {msg.localizacao && (
+                  <div className={cn("flex items-center gap-1 mt-1.5", isOwn ? "text-primary-foreground/70" : "text-muted-foreground")}>
+                    <MapPin className="w-3 h-3" />
+                    <span className="text-[10px]">{msg.localizacao}</span>
+                  </div>
+                )}
+                {isOwn && (
+                  <div className="text-[10px] text-primary-foreground/60 text-right mt-1">{timeAgo(msg.data)}</div>
+                )}
               </div>
-            )}
-          </div>
-        ))}
+            </div>
+          );
+        })}
         <div ref={bottomRef} />
       </div>
 
@@ -331,16 +229,13 @@ const Chat = () => {
         <div className="border-t border-border bg-muted/30 px-4 py-2">
           <div className="flex flex-wrap gap-1.5">
             {LOCATIONS.map(loc => (
-              <button
-                key={loc}
-                onClick={() => { setSelectedLocation(loc); setShowLocation(false); }}
+              <button key={loc} onClick={() => { setLocation(loc); setShowLocation(false); }}
                 className={cn(
                   "px-2.5 py-1 rounded-full text-[11px] font-medium transition-all active:scale-95",
-                  selectedLocation === loc
+                  location === loc
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted border border-border text-muted-foreground hover:text-foreground"
-                )}
-              >
+                )}>
                 📍 {loc}
               </button>
             ))}
@@ -349,22 +244,27 @@ const Chat = () => {
       )}
 
       {/* Input bar */}
-      <div className="sticky bottom-0 border-t border-border glass-strong px-4 py-3 safe-area-bottom">
-        {selectedLocation && (
-          <div className="flex items-center gap-1.5 mb-2 text-xs text-primary">
-            <MapPin className="w-3 h-3" />
-            <span>{selectedLocation}</span>
-            <button onClick={() => setSelectedLocation("")} className="ml-1 text-muted-foreground hover:text-foreground">✕</button>
-          </div>
-        )}
+      <div className="sticky bottom-0 border-t border-border glass-strong px-4 py-3">
+        <div className="flex items-center gap-2 mb-2">
+          <input
+            type="text"
+            value={autor}
+            onChange={e => setAutor(e.target.value)}
+            placeholder="Seu nome (opcional)"
+            className="w-28 sm:w-36 px-3 py-1.5 rounded-xl border border-border bg-background text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+          />
+          {location && (
+            <div className="flex items-center gap-1 text-xs text-primary">
+              <MapPin className="w-3 h-3" />
+              <span>{location}</span>
+              <button onClick={() => setLocation("")} className="ml-0.5 text-muted-foreground hover:text-foreground">✕</button>
+            </div>
+          )}
+        </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowLocation(!showLocation)}
-            className={cn(
-              "p-2.5 rounded-xl transition-all active:scale-90",
-              showLocation ? "bg-primary text-primary-foreground" : "bg-muted/50 text-muted-foreground hover:text-foreground border border-border"
-            )}
-          >
+          <button onClick={() => setShowLocation(!showLocation)}
+            className={cn("p-2.5 rounded-xl transition-all active:scale-90",
+              showLocation ? "bg-primary text-primary-foreground" : "bg-muted/50 text-muted-foreground hover:text-foreground border border-border")}>
             <MapPin className="w-4 h-4" />
           </button>
           <input
@@ -372,17 +272,17 @@ const Chat = () => {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && handleSend()}
-            placeholder="Compartilhe informações sobre a cidade..."
+            placeholder="Compartilhe informações sobre Sorocaba..."
             className="flex-1 bg-muted/50 border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
           />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim()}
-            className="p-2.5 rounded-xl bg-primary text-primary-foreground disabled:opacity-40 transition-all active:scale-90 hover:bg-primary/90"
-          >
+          <button onClick={handleSend} disabled={!input.trim() || sending}
+            className="p-2.5 rounded-xl bg-primary text-primary-foreground disabled:opacity-40 transition-all active:scale-90 hover:bg-primary/90">
             <Send className="w-4 h-4" />
           </button>
         </div>
+        <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
+          Mensagens salvas em tempo real via Supabase Realtime
+        </p>
       </div>
     </div>
   );

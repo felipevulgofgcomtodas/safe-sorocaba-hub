@@ -6,15 +6,164 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+// ── App types ────────────────────────────────────────────────────────────────
+
+export interface PontoColeta {
+  id: string
+  nome: string
+  endereco: string
+  latitude: number
+  longitude: number
+  tipo: string
+  capacidade: number
+  ocupados: number
+  ativo: boolean
+  created_at: string
+}
+
+export interface AreaRisco {
+  id: string
+  nome: string
+  nivel: 'alto' | 'medio' | 'moderado'
+  latitude: number
+  longitude: number
+  raio_metros: number
+  ativo: boolean
+}
+
+export interface KitProducao {
+  id: string
+  tipo: string
+  quantidade: number
+  conformidade: string
+  status: string
+  data: string
+}
+
+export interface Doacao {
+  id: string
+  ponto_coleta_id: string | null
+  tipo_kit: string
+  quantidade: number
+  responsavel: string | null
+  data: string
+}
+
+export interface Campanha {
+  id: string
+  titulo: string
+  descricao: string
+  meta: number
+  valor_arrecadado: number
+  chave_pix: string
+  ativa: boolean
+  created_at: string
+}
+
+export interface Contribuicao {
+  id: string
+  campanha_id: string | null
+  valor: number
+  nome_doador: string | null
+  anonimo: boolean
+  data: string
+}
+
+export interface MensagemChat {
+  id: string
+  autor: string
+  texto: string
+  tipo: 'geral' | 'urgente' | 'voluntario' | 'doacao'
+  localizacao: string | null
+  data: string
+}
+
+export interface Voluntario {
+  id: string
+  nome: string
+  telefone: string | null
+  habilidades: string[]
+  disponibilidade: string
+  bairro: string | null
+  ativo: boolean
+  data: string
+}
+
+export interface StatusSistema {
+  id: string
+  nivel: 'pre-operacional' | 'atencao' | 'alerta' | 'operacao-ativa'
+  precipitacao_mm: number
+  areas_risco_ativas: number
+  atualizado_em: string
+}
+
+export interface Alerta {
+  id: string
+  titulo: string
+  mensagem: string
+  nivel: 'info' | 'atencao' | 'alerta' | 'critico'
+  ativo: boolean
+  data: string
+}
+
+// ── Supabase Database type ────────────────────────────────────────────────────
+
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.4"
   }
   public: {
     Tables: {
-      [_ in never]: never
+      pontos_coleta: {
+        Row: PontoColeta
+        Insert: Omit<PontoColeta, 'id' | 'created_at'>
+        Update: Partial<Omit<PontoColeta, 'id'>>
+      }
+      areas_risco: {
+        Row: AreaRisco
+        Insert: Omit<AreaRisco, 'id'>
+        Update: Partial<Omit<AreaRisco, 'id'>>
+      }
+      kits_producao: {
+        Row: KitProducao
+        Insert: Omit<KitProducao, 'id'>
+        Update: Partial<Omit<KitProducao, 'id'>>
+      }
+      doacoes: {
+        Row: Doacao
+        Insert: Omit<Doacao, 'id'>
+        Update: Partial<Omit<Doacao, 'id'>>
+      }
+      campanhas: {
+        Row: Campanha
+        Insert: Omit<Campanha, 'id' | 'created_at'>
+        Update: Partial<Omit<Campanha, 'id'>>
+      }
+      contribuicoes: {
+        Row: Contribuicao
+        Insert: Omit<Contribuicao, 'id'>
+        Update: Partial<Omit<Contribuicao, 'id'>>
+      }
+      mensagens_chat: {
+        Row: MensagemChat
+        Insert: Omit<MensagemChat, 'id'>
+        Update: Partial<Omit<MensagemChat, 'id'>>
+      }
+      voluntarios: {
+        Row: Voluntario
+        Insert: Omit<Voluntario, 'id'>
+        Update: Partial<Omit<Voluntario, 'id'>>
+      }
+      status_sistema: {
+        Row: StatusSistema
+        Insert: Omit<StatusSistema, 'id'>
+        Update: Partial<Omit<StatusSistema, 'id'>>
+      }
+      alertas: {
+        Row: Alerta
+        Insert: Omit<Alerta, 'id'>
+        Update: Partial<Omit<Alerta, 'id'>>
+      }
     }
     Views: {
       [_ in never]: never
@@ -30,126 +179,3 @@ export type Database = {
     }
   }
 }
-
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
-
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
-
-export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
-
-export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
-
-export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
-
-export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
-
-export const Constants = {
-  public: {
-    Enums: {},
-  },
-} as const
