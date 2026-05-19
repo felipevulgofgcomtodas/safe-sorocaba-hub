@@ -1,66 +1,44 @@
 import { useEffect, useState } from "react";
-import { Droplets, Shield, Users, AlertTriangle } from "lucide-react";
+import { Droplets, Shield, MapPin, Package } from "lucide-react";
 
 interface StatProps {
   icon: typeof Droplets;
   label: string;
-  value: number;
-  suffix?: string;
+  value: string;
   color: string;
   bgColor: string;
 }
 
-const AnimatedNumber = ({ target, suffix = "" }: { target: number; suffix?: string }) => {
-  const [current, setCurrent] = useState(0);
-  useEffect(() => {
-    let start = 0;
-    const step = Math.max(1, Math.floor(target / 40));
-    const timer = setInterval(() => {
-      start += step;
-      if (start >= target) { setCurrent(target); clearInterval(timer); }
-      else setCurrent(start);
-    }, 30);
-    return () => clearInterval(timer);
-  }, [target]);
-  return <>{current.toLocaleString("pt-BR")}{suffix}</>;
-};
-
-const StatCard = ({ icon: Icon, label, value, suffix, color, bgColor }: StatProps) => (
+const StatCard = ({ icon: Icon, label, value, color, bgColor }: StatProps) => (
   <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-card/80 border border-border/50 hover:border-primary/20 transition-all group backdrop-blur-sm">
     <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${bgColor} transition-colors flex-shrink-0`}>
       <Icon className={`w-3.5 h-3.5 ${color}`} />
     </div>
     <div className="min-w-0">
-      <p className={`text-base font-bold tabular-nums leading-tight ${color}`}>
-        <AnimatedNumber target={value} suffix={suffix} />
-      </p>
+      <p className={`text-base font-bold tabular-nums leading-tight ${color}`}>{value}</p>
       <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium truncate">{label}</p>
     </div>
   </div>
 );
 
-interface DashboardStatsProps {
-  simulationMode?: boolean;
-}
-
-const DashboardStats = ({ simulationMode }: DashboardStatsProps) => {
-  const [rainLevel, setRainLevel] = useState(42);
+const DashboardStats = () => {
+  const [precipitacao, setPrecipitacao] = useState<string>("—");
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setRainLevel(prev => {
-        const delta = Math.floor(Math.random() * 8) - 3;
-        return Math.max(10, Math.min(100, prev + delta + (simulationMode ? 2 : 0)));
-      });
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [simulationMode]);
+    fetch(
+      "https://api.open-meteo.com/v1/forecast?latitude=-23.5015&longitude=-47.4526&current=precipitation&timezone=America/Sao_Paulo",
+      { signal: AbortSignal.timeout(5000) }
+    )
+      .then(r => r.json())
+      .then(j => setPrecipitacao(`${(j?.current?.precipitation ?? 0).toFixed(1)} mm/h`))
+      .catch(() => setPrecipitacao("0.0 mm/h"));
+  }, []);
 
   const stats: StatProps[] = [
-    { icon: Droplets, label: "Nível de Chuva", value: simulationMode ? 92 : rainLevel, suffix: "mm/h", color: "text-primary", bgColor: "bg-primary/15" },
-    { icon: AlertTriangle, label: "Áreas de Risco", value: simulationMode ? 10 : 7, color: "text-danger", bgColor: "bg-danger/15" },
-    { icon: Shield, label: "Abrigos Ativos", value: simulationMode ? 28 : 30, color: "text-safe", bgColor: "bg-safe/15" },
-    { icon: Users, label: "Pessoas Abrigadas", value: simulationMode ? 4250 : 2873, color: "text-warning", bgColor: "bg-warning/15" },
+    { icon: Droplets, label: "Precipitação Atual",   value: precipitacao, color: "text-primary",  bgColor: "bg-primary/15"  },
+    { icon: MapPin,   label: "Áreas de Risco",        value: "6 zonas",   color: "text-danger",   bgColor: "bg-danger/15"   },
+    { icon: Shield,   label: "Pontos de Coleta",      value: "3 ativos",  color: "text-safe",     bgColor: "bg-safe/15"     },
+    { icon: Package,  label: "Kits Produzidos",       value: "169 kits",  color: "text-warning",  bgColor: "bg-warning/15"  },
   ];
 
   return (

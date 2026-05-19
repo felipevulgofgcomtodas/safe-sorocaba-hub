@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Heart, Package, Baby, UtensilsCrossed, ShoppingCart, CheckCircle, ChevronDown, ChevronUp, Send, MapPin } from "lucide-react";
+import {
+  ArrowLeft, Heart, Package, Baby, UtensilsCrossed, ShoppingCart,
+  ChevronDown, ChevronUp, MapPin, MessageCircle,
+} from "lucide-react";
 import Header from "@/components/Header";
-import { supabase } from "@/integrations/supabase/client";
 import { shelters } from "@/data/shelters";
+
+const WA_NUMBER = "5515992566575";
 
 const KITS = [
   {
-    id: "higiene_basico",
+    id: "kit_higiene",
     title: "Kit Higiênico Básico",
     subtitle: "1 pessoa / 1 mês",
     icon: Heart,
@@ -17,7 +21,7 @@ const KITS = [
     itens: ["Sabonete", "Escova de dentes", "Creme dental", "Shampoo", "Papel higiênico", "Toalha", "Desodorante"],
   },
   {
-    id: "higiene_bebe",
+    id: "kit_higiene_bebe",
     title: "Kit Higiene Bebê",
     subtitle: "1 semana",
     icon: Baby,
@@ -27,8 +31,8 @@ const KITS = [
     itens: ["Fraldas", "Lenços umedecidos", "Pomada para assaduras", "Sabonete infantil", "Toalha"],
   },
   {
-    id: "alimentacao_72h",
-    title: "Kit Alimentação 72h",
+    id: "cesta_basica",
+    title: "Cesta Básica / Kit Alimentação 72h",
     subtitle: "1 pessoa",
     icon: UtensilsCrossed,
     color: "text-amber-400",
@@ -46,7 +50,29 @@ const KITS = [
     border: "border-green-400/20",
     itens: ["Sardinha", "Atum", "Carne enlatada", "Frango em conserva", "Milho", "Ervilha", "Feijão pronto", "Sopas enlatadas"],
   },
+  {
+    id: "kit_limpeza",
+    title: "Kit de Limpeza",
+    subtitle: "Doméstico",
+    icon: Package,
+    color: "text-purple-400",
+    bg: "bg-purple-400/10",
+    border: "border-purple-400/20",
+    itens: ["Detergente", "Desinfetante", "Hipoclorito de sódio", "Esponja", "Luva de borracha", "Saco de lixo 100L"],
+  },
+  {
+    id: "agua_litros",
+    title: "Água Potável",
+    subtitle: "Garrafas ou galões",
+    icon: Package,
+    color: "text-cyan-400",
+    bg: "bg-cyan-400/10",
+    border: "border-cyan-400/20",
+    itens: ["Água mineral 500ml", "Água mineral 1,5L", "Galão 20L", "Caixas 200ml"],
+  },
 ];
+
+const PONTOS = shelters.map(s => s.name);
 
 const KitCard = ({ kit }: { kit: typeof KITS[0] }) => {
   const [open, setOpen] = useState(false);
@@ -66,9 +92,7 @@ const KitCard = ({ kit }: { kit: typeof KITS[0] }) => {
             <p className="text-xs text-muted-foreground">{kit.subtitle} · {kit.itens.length} itens</p>
           </div>
         </div>
-        {open
-          ? <ChevronUp className="w-4 h-4 text-muted-foreground" />
-          : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+        {open ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
       </button>
       {open && (
         <div className="px-4 pb-4 animate-in slide-in-from-top-2 duration-200">
@@ -86,43 +110,29 @@ const KitCard = ({ kit }: { kit: typeof KITS[0] }) => {
   );
 };
 
-const TIPO_KIT_OPTIONS = [
-  { value: "cesta_basica",  label: "Cesta Básica" },
-  { value: "kit_higiene",   label: "Kit de Higiene" },
-  { value: "kit_limpeza",   label: "Kit de Limpeza" },
-  { value: "agua_litros",   label: "Água (litros)" },
-  { value: "enlatados",     label: "Enlatados" },
-];
-
 const Doacoes = () => {
-  const [form, setForm] = useState({ ponto_coleta_id: "", tipo_kit: "", quantidade: "", responsavel: "" });
-  const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
+  const [ponto, setPonto] = useState("");
+  const [tipo, setTipo] = useState("");
+  const [quantidade, setQuantidade] = useState("");
+  const [nome, setNome] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.ponto_coleta_id || !form.tipo_kit || !form.quantidade) return;
-    setSaving(true);
-    setError("");
-    try {
-      const { error: err } = await supabase.from("doacoes" as any).insert({
-        ponto_coleta_id: parseInt(form.ponto_coleta_id),
-        tipo_kit: form.tipo_kit,
-        quantidade: parseInt(form.quantidade),
-        responsavel: form.responsavel || null,
-        data: new Date().toISOString(),
-      });
-      if (err) throw err;
-      setSuccess(true);
-      setForm({ ponto_coleta_id: "", tipo_kit: "", quantidade: "", responsavel: "" });
-      setTimeout(() => setSuccess(false), 5000);
-    } catch {
-      setError("Não foi possível salvar. Tente novamente.");
-    } finally {
-      setSaving(false);
-    }
+  const tipoLabel = KITS.find(k => k.id === tipo)?.title ?? tipo;
+
+  const handleWhatsApp = () => {
+    if (!ponto || !tipo || !quantidade) return;
+    const msg = [
+      `Olá! Quero registrar uma doação para o SafeFlood Sorocaba:`,
+      ``,
+      `📦 *Doação:* ${tipoLabel}`,
+      `🔢 *Quantidade:* ${quantidade} unidade(s)`,
+      `📍 *Ponto de entrega:* ${ponto}`,
+      nome ? `👤 *Doador:* ${nome}` : "",
+    ].filter(Boolean).join("\n");
+
+    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
   };
+
+  const canSend = ponto && tipo && quantidade;
 
   return (
     <div className="min-h-screen bg-background">
@@ -140,7 +150,7 @@ const Doacoes = () => {
             </div>
             <div>
               <h1 className="font-display text-2xl font-bold text-foreground">Doações Necessárias</h1>
-              <p className="text-sm text-muted-foreground">Veja o que precisa ser doado e registre sua contribuição</p>
+              <p className="text-sm text-muted-foreground">Veja o que precisamos e avise pelo WhatsApp</p>
             </div>
           </div>
 
@@ -170,41 +180,38 @@ const Doacoes = () => {
             </div>
           </div>
 
-          {/* Formulário de registro */}
+          {/* Formulário → WhatsApp */}
           <div className="glass rounded-2xl p-6">
-            <h2 className="font-display font-bold text-foreground mb-5 flex items-center gap-2">
-              <Send className="w-5 h-5 text-primary" />
-              Registrar Doação
+            <h2 className="font-display font-bold text-foreground mb-2 flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-green-500" />
+              Registrar Doação via WhatsApp
             </h2>
+            <p className="text-sm text-muted-foreground mb-5">
+              Preencha os campos abaixo e clique no botão — vamos abrir o WhatsApp com a mensagem já pronta.
+            </p>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-4">
               <div>
                 <label className="text-xs font-semibold text-foreground mb-1.5 block">Ponto de entrega *</label>
                 <select
-                  value={form.ponto_coleta_id}
-                  onChange={e => setForm(f => ({ ...f, ponto_coleta_id: e.target.value }))}
-                  required
+                  value={ponto}
+                  onChange={e => setPonto(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 transition-all"
                 >
                   <option value="">Selecione o ponto...</option>
-                  {shelters.map(p => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
+                  {PONTOS.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
 
               <div>
                 <label className="text-xs font-semibold text-foreground mb-1.5 block">Tipo de doação *</label>
                 <select
-                  value={form.tipo_kit}
-                  onChange={e => setForm(f => ({ ...f, tipo_kit: e.target.value }))}
-                  required
+                  value={tipo}
+                  onChange={e => setTipo(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 transition-all"
                 >
                   <option value="">Selecione o tipo...</option>
-                  {TIPO_KIT_OPTIONS.map(o => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
+                  {KITS.map(k => <option key={k.id} value={k.id}>{k.title}</option>)}
                 </select>
               </div>
 
@@ -212,10 +219,9 @@ const Doacoes = () => {
                 <label className="text-xs font-semibold text-foreground mb-1.5 block">Quantidade *</label>
                 <input
                   type="number" min="1"
-                  value={form.quantidade}
-                  onChange={e => setForm(f => ({ ...f, quantidade: e.target.value }))}
+                  value={quantidade}
+                  onChange={e => setQuantidade(e.target.value)}
                   placeholder="Ex: 10"
-                  required
                   className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 transition-all"
                 />
               </div>
@@ -224,39 +230,36 @@ const Doacoes = () => {
                 <label className="text-xs font-semibold text-foreground mb-1.5 block">Seu nome (opcional)</label>
                 <input
                   type="text"
-                  value={form.responsavel}
-                  onChange={e => setForm(f => ({ ...f, responsavel: e.target.value }))}
+                  value={nome}
+                  onChange={e => setNome(e.target.value)}
                   placeholder="Nome do doador ou organização"
                   className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30 transition-all"
                 />
               </div>
 
-              {error && (
-                <p className="text-sm text-danger bg-danger/10 border border-danger/20 rounded-xl px-4 py-3">{error}</p>
-              )}
-
-              {success && (
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-safe/10 border border-safe/20 text-safe animate-in fade-in duration-300">
-                  <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-sm">Doação registrada!</p>
-                    <p className="text-xs opacity-80">Obrigado pela sua contribuição 💙</p>
-                  </div>
+              {/* Preview da mensagem */}
+              {canSend && (
+                <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-3 text-xs text-muted-foreground">
+                  <p className="font-semibold text-foreground mb-1">Mensagem que será enviada:</p>
+                  <p className="whitespace-pre-line leading-relaxed">
+                    {`📦 Doação: ${tipoLabel}\n🔢 Quantidade: ${quantidade} unidade(s)\n📍 Ponto: ${ponto}${nome ? `\n👤 Doador: ${nome}` : ""}`}
+                  </p>
                 </div>
               )}
 
               <button
-                type="submit"
-                disabled={saving}
-                className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-all active:scale-[0.97] disabled:opacity-50 flex items-center justify-center gap-2"
+                onClick={handleWhatsApp}
+                disabled={!canSend}
+                className="w-full py-3.5 rounded-xl bg-green-600 text-white font-bold text-sm hover:bg-green-700 transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-600/20"
               >
-                {saving ? (
-                  <><div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" /> Salvando...</>
-                ) : (
-                  <><Send className="w-4 h-4" /> Registrar Doação</>
-                )}
+                <MessageCircle className="w-5 h-5" />
+                Enviar pelo WhatsApp
               </button>
-            </form>
+
+              <p className="text-[11px] text-muted-foreground text-center">
+                Ao clicar, o WhatsApp abrirá com a mensagem já preenchida para o número da coordenação.
+              </p>
+            </div>
           </div>
         </div>
       </div>
