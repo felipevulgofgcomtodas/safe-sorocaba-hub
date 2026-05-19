@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { Map, Bell, Shield, Package, Radio, Heart, UserCheck, MessageCircle, CalendarDays, ArrowRight } from "lucide-react";
+import { Map, Bell, Shield, Package, Radio, Heart, UserCheck, MessageCircle, CalendarDays, ArrowRight, CloudRain } from "lucide-react";
 
 const features = [
   { icon: Map,         title: "Mapa Interativo",      desc: "Áreas de risco, zonas seguras e pontos de coleta em tempo real",  color: "text-primary", bg: "bg-primary/10", borderHover: "hover:border-primary/40", pulse: false, route: "/mapa" },
+  { icon: CloudRain,   title: "Previsão do Tempo",    desc: "7 dias com % de perigo de enchente por dia — qualquer cidade",    color: "text-blue-400",bg: "bg-blue-400/10",borderHover: "hover:border-blue-400/40", pulse: true,  route: "/clima" },
   { icon: Bell,        title: "Alertas em Tempo Real", desc: "Notificações instantâneas sobre mudanças de risco",               color: "text-danger",  bg: "bg-danger/10",  borderHover: "hover:border-danger/40",  pulse: true,  route: "/alertas" },
   { icon: Shield,      title: "Pontos de Coleta",      desc: "3 pontos reais com endereço, capacidade e estoque",               color: "text-safe",    bg: "bg-safe/10",    borderHover: "hover:border-safe/40",    pulse: false, route: "/ocupacao" },
   { icon: Package,     title: "Kits & Doações",        desc: "Cestas, higiene, limpeza e água — acompanhe e contribua",         color: "text-warning", bg: "bg-warning/10", borderHover: "hover:border-warning/40", pulse: true,  route: "/doacoes" },

@@ -16,6 +16,7 @@ import Chat from "./pages/Chat.tsx";
 import Doacoes from "./pages/Doacoes.tsx";
 import Voluntarios from "./pages/Voluntarios.tsx";
 import Cronograma from "./pages/Cronograma.tsx";
+import Clima from "./pages/Clima.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import WhatsAppButton from "./components/WhatsAppButton";
 
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/doacoes" element={<Doacoes />} />
             <Route path="/voluntarios" element={<Voluntarios />} />
             <Route path="/cronograma" element={<Cronograma />} />
+            <Route path="/clima" element={<Clima />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <WhatsAppButton />

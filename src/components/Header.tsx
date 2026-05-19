@@ -1,11 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, LogOut, User, Heart, MessageCircle, UserCheck, Map, Bell, Package, Clock } from "lucide-react";
+import { Menu, X, LogOut, User, Heart, MessageCircle, UserCheck, Map, Bell, Package, Clock, CloudRain } from "lucide-react";
 import { useState } from "react";
 import logoPrefeiture from "@/assets/logo-prefeitura.png";
 import { useAuth } from "@/contexts/AuthContext";
 
 const NAV_LINKS = [
   { to: "/mapa",         label: "Mapa",       icon: Map },
+  { to: "/clima",        label: "Clima",       icon: CloudRain },
   { to: "/alertas",      label: "Alertas",     icon: Bell },
   { to: "/ocupacao",     label: "Coleta",      icon: Package },
   { to: "/doacoes",      label: "Doações",     icon: Heart },
