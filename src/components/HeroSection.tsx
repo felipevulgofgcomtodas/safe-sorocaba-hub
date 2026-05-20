@@ -129,9 +129,9 @@ const HeroSection = () => {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full max-w-lg md:max-w-2xl mt-10 md:mt-16 animate-fade-in" style={{ animationDelay: '800ms' }}>
           {[
-            { icon: Shield, label: "Áreas Monitoradas", value: "47", color: "text-primary", glow: "shadow-primary/10" },
-            { icon: Users, label: "Abrigos Ativos", value: "30", color: "text-safe", glow: "shadow-safe/10" },
-            { icon: Bell, label: "Alertas Ativos", value: "3", color: "text-warning", glow: "shadow-warning/10" },
+            { icon: Shield, label: "Zonas de Risco", value: "6", color: "text-primary", glow: "shadow-primary/10" },
+            { icon: Users, label: "Pontos de Coleta", value: "3", color: "text-safe", glow: "shadow-safe/10" },
+            { icon: Bell, label: "Kits Produzidos", value: "169", color: "text-warning", glow: "shadow-warning/10" },
           ].map((stat) => (
             <div key={stat.label} className={`glass rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 text-center hover:bg-muted/20 transition-all duration-300 shadow-lg ${stat.glow} group hover:-translate-y-0.5`}>
               <stat.icon className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 mx-auto mb-1.5 ${stat.color} group-hover:scale-110 transition-transform`} />

@@ -1,8 +1,9 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft, Shield, Search, MapPin, AlertTriangle, Navigation,
   Users, Filter, Zap, User, LogOut, ChevronUp, Info,
+  Thermometer, Wind, Droplets, CloudRain, Home,
 } from "lucide-react";
 import {
   MapContainer, TileLayer, Circle, CircleMarker, Marker, Popup, useMap,
@@ -100,9 +101,27 @@ const LegendPanel = () => {
   );
 };
 
+// ---- Danger helper (same formula as Clima.tsx) ----
+interface DangerInfo { pct: number; label: string; color: string; bg: string; border: string; barColor: string; }
+function getDanger(precipMm: number, precipProbPct: number, wmoCode: number): DangerInfo {
+  const stormBonus = wmoCode >= 95 ? 30 : wmoCode >= 80 ? 15 : wmoCode >= 61 ? 8 : 0;
+  const raw = precipMm * 6 * 0.6 + precipProbPct * 0.25 + stormBonus;
+  const pct = Math.min(100, Math.round(raw));
+  if (pct >= 75) return { pct, label: "Crítico",   color: "text-red-400",    bg: "bg-red-500/10",    border: "border-red-500/30",   barColor: "bg-red-500" };
+  if (pct >= 50) return { pct, label: "Alto",      color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/30", barColor: "bg-orange-500" };
+  if (pct >= 25) return { pct, label: "Moderado",  color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/30", barColor: "bg-yellow-500" };
+  if (pct >= 10) return { pct, label: "Baixo",     color: "text-blue-400",   bg: "bg-blue-500/10",   border: "border-blue-500/30",   barColor: "bg-blue-500" };
+  return               { pct, label: "Normal",     color: "text-green-400",  bg: "bg-green-500/10",  border: "border-green-500/30",  barColor: "bg-green-500" };
+}
+
+interface WeatherNow {
+  temp: number; precip: number; precipProb: number; wind: number; wmoCode: number;
+}
+
 // ---- Página principal ----
 const Mapa = () => {
   const { user, logout } = useAuth();
+  const [searchParams] = useSearchParams();
   const [shelterData, setShelterData] = useState<Shelter[]>(initialShelters);
   const [selectedShelter, setSelectedShelter] = useState<Shelter | null>(null);
   const [address, setAddress] = useState("");
@@ -115,6 +134,8 @@ const Mapa = () => {
   const [simulationMode, setSimulationMode] = useState(false);
   const [emergencyOpen, setEmergencyOpen] = useState(false);
   const [flyTarget, setFlyTarget] = useState<[number, number] | null>(null);
+  const [weatherNow, setWeatherNow] = useState<WeatherNow | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
 
   useEffect(() => {
     if (user?.address && !userLocation) setAddress(user.address);
@@ -147,6 +168,53 @@ const Mapa = () => {
     return () => clearInterval(id);
   }, []);
 
+  // Auto-trigger from URL params (?address=... or ?geo=true)
+  useEffect(() => {
+    const addrParam = searchParams.get("address");
+    const geoParam  = searchParams.get("geo");
+    if (addrParam) {
+      setAddress(addrParam);
+      (async () => {
+        setSearching(true);
+        try {
+          const res  = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addrParam + ", Sorocaba, SP, Brasil")}&limit=1`);
+          const data = await res.json();
+          if (data.length > 0) processLocation(parseFloat(data[0].lat), parseFloat(data[0].lon));
+        } catch {} finally { setSearching(false); }
+      })();
+    } else if (geoParam === "true") {
+      if (navigator.geolocation) {
+        setSearching(true);
+        navigator.geolocation.getCurrentPosition(
+          pos => { processLocation(pos.coords.latitude, pos.coords.longitude); setSearching(false); },
+          () => setSearching(false),
+        );
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run once on mount
+
+  const fetchWeather = useCallback(async (lat: number, lng: number) => {
+    setWeatherLoading(true);
+    try {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,precipitation,precipitation_probability,weathercode,windspeed_10m&timezone=America/Sao_Paulo`;
+      const res  = await fetch(url, { signal: AbortSignal.timeout(6000) });
+      const j    = await res.json();
+      const c    = j?.current ?? {};
+      setWeatherNow({
+        temp:       c.temperature_2m        ?? 0,
+        precip:     c.precipitation         ?? 0,
+        precipProb: c.precipitation_probability ?? 0,
+        wind:       c.windspeed_10m         ?? 0,
+        wmoCode:    c.weathercode           ?? 0,
+      });
+    } catch {
+      setWeatherNow(null);
+    } finally {
+      setWeatherLoading(false);
+    }
+  }, []);
+
   const filteredShelters = useMemo(() => {
     if (filterStatus === "all") return shelterData;
     return shelterData.filter(s => s.status === filterStatus);
@@ -168,7 +236,8 @@ const Mapa = () => {
     setRecommended(nearest);
     if (nearest) setSelectedShelter(nearest);
     setFlyTarget([lat, lng]);
-  }, [simulationMode]);
+    fetchWeather(lat, lng);
+  }, [simulationMode, fetchWeather]);
 
   const handleSearch = async () => {
     if (!address.trim()) return;
@@ -322,25 +391,110 @@ const Mapa = () => {
             </div>
           </div>
 
-          {/* Recommendation */}
-          {recommended && userLocation && (
-            <div className="p-4 border-b border-border animate-in slide-in-from-top-2 duration-300">
-              <span className="text-[10px] text-safe uppercase tracking-widest font-bold">🔥 Recomendado para você</span>
-              <button
-                onClick={() => { setSelectedShelter(recommended); setSidebarOpen(false); setFlyTarget([recommended.lat, recommended.lng]); }}
-                className="mt-2 w-full text-left p-3 rounded-xl bg-safe/10 border border-safe/20 hover:bg-safe/20 transition-all active:scale-[0.99]"
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <Navigation className="w-3.5 h-3.5 text-safe" />
-                  <span className="text-sm font-bold text-foreground">{recommended.name}</span>
+          {/* ---- Risk Analysis Panel (shown after address/geo search) ---- */}
+          {userLocation && (
+            <div className="border-b border-border animate-in slide-in-from-top-2 duration-300">
+              {/* Weather Risk */}
+              <div className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-primary uppercase tracking-widest font-bold flex items-center gap-1">
+                    <CloudRain className="w-3 h-3" /> Análise de Risco
+                  </span>
+                  <span className="text-[9px] text-muted-foreground">de acordo com a previsão agora</span>
                 </div>
-                <p className="text-xs text-muted-foreground">{recommended.address}</p>
-                <div className="flex items-center gap-3 mt-2">
-                  <p className="text-xs text-safe font-medium">{recommended.capacity - recommended.occupied} vagas</p>
-                  <span className="text-[10px] text-muted-foreground">~{haversineKm(userLocation.lat, userLocation.lng, recommended.lat, recommended.lng).toFixed(1)}km</span>
-                  <span className="text-[10px] text-muted-foreground">~{Math.ceil(haversineKm(userLocation.lat, userLocation.lng, recommended.lat, recommended.lng) * 12)}min a pé</span>
+
+                {/* "Você está aqui" */}
+                <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse flex-shrink-0" />
+                  <span className="text-xs font-semibold text-blue-400">Você está aqui</span>
+                  <span className="text-[10px] text-muted-foreground ml-auto tabular-nums">
+                    {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+                  </span>
                 </div>
-              </button>
+
+                {weatherLoading && (
+                  <div className="text-xs text-muted-foreground text-center py-2">Carregando dados climáticos…</div>
+                )}
+
+                {!weatherLoading && weatherNow && (() => {
+                  const danger = getDanger(weatherNow.precip, weatherNow.precipProb, weatherNow.wmoCode);
+                  const shouldLeave = danger.pct >= 50;
+                  return (
+                    <>
+                      {/* Danger bar */}
+                      <div className={`rounded-xl p-3 ${danger.bg} border ${danger.border}`}>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-xs font-bold text-foreground">Perigo de enchente</span>
+                          <span className={`text-sm font-black tabular-nums ${danger.color}`}>{danger.pct}%</span>
+                        </div>
+                        <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full transition-all duration-700 ${danger.barColor}`} style={{ width: `${danger.pct}%` }} />
+                        </div>
+                        <span className={`text-[10px] font-semibold mt-1 block ${danger.color}`}>{danger.label}</span>
+                      </div>
+
+                      {/* Current conditions grid */}
+                      <div className="grid grid-cols-3 gap-1.5">
+                        <div className="bg-card border border-border rounded-lg p-2 text-center">
+                          <Thermometer className="w-3.5 h-3.5 text-orange-400 mx-auto mb-1" />
+                          <p className="text-xs font-bold text-foreground tabular-nums">{weatherNow.temp.toFixed(1)}°C</p>
+                          <p className="text-[9px] text-muted-foreground">Temp.</p>
+                        </div>
+                        <div className="bg-card border border-border rounded-lg p-2 text-center">
+                          <Droplets className="w-3.5 h-3.5 text-blue-400 mx-auto mb-1" />
+                          <p className="text-xs font-bold text-foreground tabular-nums">{weatherNow.precip.toFixed(1)} mm</p>
+                          <p className="text-[9px] text-muted-foreground">Chuva</p>
+                        </div>
+                        <div className="bg-card border border-border rounded-lg p-2 text-center">
+                          <Wind className="w-3.5 h-3.5 text-cyan-400 mx-auto mb-1" />
+                          <p className="text-xs font-bold text-foreground tabular-nums">{weatherNow.wind.toFixed(0)} km/h</p>
+                          <p className="text-[9px] text-muted-foreground">Vento</p>
+                        </div>
+                      </div>
+
+                      {/* Recommendation */}
+                      <div className={`rounded-xl p-3 flex items-start gap-3 ${shouldLeave ? "bg-danger/10 border border-danger/30" : "bg-safe/10 border border-safe/20"}`}>
+                        {shouldLeave
+                          ? <AlertTriangle className="w-4 h-4 text-danger flex-shrink-0 mt-0.5 animate-pulse" />
+                          : <Home className="w-4 h-4 text-safe flex-shrink-0 mt-0.5" />
+                        }
+                        <div>
+                          <p className={`text-xs font-bold ${shouldLeave ? "text-danger" : "text-safe"}`}>
+                            {shouldLeave ? "⚠️ Recomendamos sair de casa" : "✅ Fique em casa por ora"}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
+                            {shouldLeave
+                              ? "Risco elevado de enchente na sua área. Dirija-se ao ponto de coleta mais próximo."
+                              : "Condições climáticas estáveis. Fique atento aos alertas e evite áreas de risco."}
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+
+              {/* Nearest shelter */}
+              {recommended && (
+                <div className="px-4 pb-4">
+                  <span className="text-[10px] text-safe uppercase tracking-widest font-bold">🏠 Ponto de coleta mais próximo</span>
+                  <button
+                    onClick={() => { setSelectedShelter(recommended); setSidebarOpen(false); setFlyTarget([recommended.lat, recommended.lng]); }}
+                    className="mt-2 w-full text-left p-3 rounded-xl bg-safe/10 border border-safe/20 hover:bg-safe/20 transition-all active:scale-[0.99]"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <Navigation className="w-3.5 h-3.5 text-safe" />
+                      <span className="text-sm font-bold text-foreground">{recommended.name}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{recommended.address}</p>
+                    <div className="flex items-center gap-3 mt-2">
+                      <p className="text-xs text-safe font-medium">{recommended.capacity - recommended.occupied} vagas</p>
+                      <span className="text-[10px] text-muted-foreground">~{haversineKm(userLocation.lat, userLocation.lng, recommended.lat, recommended.lng).toFixed(1)}km</span>
+                      <span className="text-[10px] text-muted-foreground">~{Math.ceil(haversineKm(userLocation.lat, userLocation.lng, recommended.lat, recommended.lng) * 12)}min a pé</span>
+                    </div>
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
